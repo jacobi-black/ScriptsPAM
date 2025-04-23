@@ -19,15 +19,15 @@ def save_to_file(name, content):
     path = os.path.join(OUTPUT_DIR, name)
     with open(path, "w") as f:
         json.dump(content, f, indent=2)
-    print(f"📁 Sauvegardé : {path}")
+    print(f"\U0001F4C1 Sauvegardé : {path}")
 
 def test_token(auth_header_value):
     test_url = f"{BASE_URL}/LoginsInfo"
     headers = HEADERS.copy()
     headers["Authorization"] = auth_header_value
-    print(f"🔍 Test token sur {test_url} avec header:", auth_header_value[:30], "...")
+    print(f"\U0001F50D Test token sur {test_url} avec header:", auth_header_value[:30], "...")
     res = requests.get(test_url, headers=headers, verify=VERIFY_SSL)
-    print("🔍 Code HTTP:", res.status_code)
+    print("\U0001F50D Code HTTP:", res.status_code)
     if res.status_code == 200:
         print("✅ Token accepté.")
         return auth_header_value
@@ -46,7 +46,6 @@ def authenticate():
         print("✅ Authentification réussie.")
         print("🔑 Token reçu :", token[:20], "...")
 
-        # Test avec Bearer
         bearer_auth = f"Bearer {token}"
         simple_auth = token
 
@@ -62,9 +61,10 @@ def authenticate():
         raise
 
 def get_data(endpoint, filename, paginated=True, limit=100, max_pages=50):
-    print(f"\n📡 Requête GET {endpoint}")
+    print(f"\n\U0001F4E1 Requête GET {endpoint}")
     results = []
     offset = 0
+    last_page_data = None
 
     try:
         for page in range(max_pages):
@@ -84,11 +84,13 @@ def get_data(endpoint, filename, paginated=True, limit=100, max_pages=50):
 
             data = res.json()
             chunk = data.get("value") if isinstance(data, dict) and "value" in data else data
-            if not chunk:
-                print("🛑 Fin des données.")
+            if not chunk or chunk == last_page_data:
+                print("🛑 Fin des données ou boucle détectée.")
                 break
 
+            print(f"📦 Page {page + 1} : {len(chunk)} éléments")
             results.extend(chunk if isinstance(chunk, list) else [chunk])
+            last_page_data = chunk
             offset += limit
 
             if not paginated:
