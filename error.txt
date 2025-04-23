@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "C:\Users\oudeletk\OneDrive - STMicroelectronics\Documents\Visual Studio\PAM Script\ScriptsPAM\api.py", line 154, in <module>
+    main()
+  File "C:\Users\oudeletk\OneDrive - STMicroelectronics\Documents\Visual Studio\PAM Script\ScriptsPAM\api.py", line 96, in main
+    cfg = load_config(args.config)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oudeletk\OneDrive - STMicroelectronics\Documents\Visual Studio\PAM Script\ScriptsPAM\api.py", line 33, in load_config
+    'verify_ssl':  cfg.getboolean('CyberArk', 'verify_ssl', fallback=True),
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oudeletk\AppData\Local\Programs\Python\Python311\Lib\configparser.py", line 844, in getboolean
+    return self._get_conv(section, option, self._convert_to_boolean,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oudeletk\AppData\Local\Programs\Python\Python311\Lib\configparser.py", line 824, in _get_conv
+    return self._get(section, conv, option, raw=raw, vars=vars,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oudeletk\AppData\Local\Programs\Python\Python311\Lib\configparser.py", line 819, in _get
+    return conv(self.get(section, option, **kwargs))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\oudeletk\AppData\Local\Programs\Python\Python311\Lib\configparser.py", line 1182, in _convert_to_boolean  
+    raise ValueError('Not a boolean: %s' % value)
+ValueError: Not a boolean: true        ; true pour vÃ©rifier le certificat SSL, false pour dÃ©sactiver
