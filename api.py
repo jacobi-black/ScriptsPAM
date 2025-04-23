@@ -3,78 +3,95 @@ import json
 import os
 import time
 
-BASE_URL = "https://<PVWA_URL>/PasswordVault/api"
-USERNAME = "<your_username>"
-PASSWORD = "<your_password>"
+# === CONFIGURATION ===
+PVWA_URL = "https://cyberark.tondomaine.local"  # 🔁 Remplace ici
+USERNAME = "ton_utilisateur"
+PASSWORD = "ton_mot_de_passe"
+BASE_URL = f"{PVWA_URL}/PasswordVault/api"
+VERIFY_SSL = False  # à True en prod avec certificat valide
 
-HEADERS = {
-    "Content-Type": "application/json"
-}
-
+# === SETUP ===
+HEADERS = {"Content-Type": "application/json"}
 OUTPUT_DIR = "cyberark_data"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def save_to_file(name, content):
-    with open(os.path.join(OUTPUT_DIR, name), "w") as f:
+    path = os.path.join(OUTPUT_DIR, name)
+    with open(path, "w") as f:
         json.dump(content, f, indent=2)
+    print(f"📁 Sauvegardé : {path}")
 
 def authenticate():
-    auth_url = f"{BASE_URL}/Auth/cyberark/Logon"
+    print("🔐 Authentification en cours...")
+    url = f"{BASE_URL}/Auth/cyberark/Logon"
     payload = {"username": USERNAME, "password": PASSWORD}
-    res = requests.post(auth_url, json=payload, headers=HEADERS, verify=False)
-    res.raise_for_status()
-    token = res.text.strip('"')
-    HEADERS["Authorization"] = f"Bearer {token}"
-    return token
+    try:
+        res = requests.post(url, json=payload, headers=HEADERS, verify=VERIFY_SSL)
+        res.raise_for_status()
+        token = res.text.strip('"')
+        print("✅ Authentification réussie.")
+        print("🔑 Token reçu :", token[:20], "...(tronqué)")
+        HEADERS["Authorization"] = f"Bearer {token}"
+        return token
+    except requests.exceptions.RequestException as e:
+        print("❌ Échec de l'authentification :", e)
+        raise
 
-def fetch_paginated(endpoint, filename, key=None, limit=100, max_pages=100):
-    all_data = []
+def get_data(endpoint, filename, paginated=True, limit=100, max_pages=50):
+    print(f"\n📡 Requête GET {endpoint}")
+    results = []
     offset = 0
-    for _ in range(max_pages):
-        url = f"{BASE_URL}{endpoint}?limit={limit}&offset={offset}"
-        res = requests.get(url, headers=HEADERS, verify=False)
-        if res.status_code != 200:
-            print(f"❌ Failed to fetch {endpoint} with offset {offset}")
-            break
 
-        data = res.json()
-        chunk = data[key] if key and key in data else data.get("value") or data
-        if not chunk:
-            break
-        all_data.extend(chunk)
-        offset += limit
-        time.sleep(0.5)  # Eviter surcharge API
-    save_to_file(filename, all_data)
+    try:
+        for page in range(max_pages):
+            url = f"{BASE_URL}{endpoint}"
+            if paginated:
+                url += f"?limit={limit}&offset={offset}"
 
-def fetch_simple(endpoint, filename):
-    url = f"{BASE_URL}{endpoint}"
-    res = requests.get(url, headers=HEADERS, verify=False)
-    res.raise_for_status()
-    save_to_file(filename, res.json())
+            print(f"➡️ {url}")
+            res = requests.get(url, headers=HEADERS, verify=VERIFY_SSL)
+
+            if res.status_code != 200:
+                print(f"❌ Erreur HTTP {res.status_code} pour {url}")
+                print("⛔ Contenu:", res.text)
+                break
+
+            data = res.json()
+            chunk = data.get("value") if isinstance(data, dict) and "value" in data else data
+            if not chunk:
+                print("🛑 Fin des données.")
+                break
+
+            results.extend(chunk if isinstance(chunk, list) else [chunk])
+            offset += limit
+
+            if not paginated:
+                break
+            time.sleep(0.5)
+
+        save_to_file(filename, results)
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Exception durant la requête {endpoint} :", e)
 
 def main():
     try:
         authenticate()
 
-        # Endpoints paginés
-        fetch_paginated("/Accounts", "accounts.json")
-        fetch_paginated("/Safes", "safes.json")
-        fetch_paginated("/Platforms", "platforms.json")
-        fetch_paginated("/Users", "users.json")
-        fetch_paginated("/LiveSessions", "live_sessions.json")
-        fetch_paginated("/Recordings", "recordings.json")
-        fetch_paginated("/MyRequests", "my_requests.json")
-        fetch_paginated("/IncomingRequests", "incoming_requests.json")
+        # Requêtes GET pour dashboard d’utilisation
+        get_data("/Accounts", "accounts.json")
+        get_data("/Safes", "safes.json")
+        get_data("/Platforms", "platforms.json")
+        get_data("/Users", "users.json")
+        get_data("/LiveSessions", "live_sessions.json")
+        get_data("/Recordings", "recordings.json")
+        get_data("/MyRequests", "my_requests.json")
+        get_data("/IncomingRequests", "incoming_requests.json")
+        get_data("/ComponentsMonitoringSummary", "components_monitoring.json", paginated=False)
 
-        # Endpoint simple
-        fetch_simple("/ComponentsMonitoringSummary", "components_monitoring.json")
+        print("\n✅ Toutes les données ont été récupérées avec succès.")
 
-        print(f"✅ Tous les fichiers JSON sont dans : {OUTPUT_DIR}/")
-
-    except requests.HTTPError as e:
-        print(f"❌ Erreur HTTP : {e.response.status_code} - {e.response.text}")
     except Exception as e:
-        print(f"❌ Erreur : {e}")
+        print("❌ Échec général :", e)
 
 if __name__ == "__main__":
     main()
