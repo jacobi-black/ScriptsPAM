@@ -1,0 +1,6173 @@
+swaggerswagger 
+Search...
+ 
+Explore
+Privileged Access Security REST API
+Display the PVWA REST APIs below for a description of how to use them and try them out. Access information about additional REST APIs through the online documentation.
+
+Web Services Documentation
+Account GroupsShow/HideList OperationsExpand Operations
+get /api/AccountGroups
+Implementation Notes
+This method returns all the account groups in a specific Safe.
+
+The user performing this task must have the following permissions in the Safe: List Accounts.
+
+Response Class (Status 200)
+List of relevant groups
+
+ModelExample Value
+{
+  "GroupID": "string",
+  "GroupName": "string",
+  "GroupPlatformID": "string",
+  "Safe": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+safe	
+The name of the Safe where the account groups are.
+
+query	string
+post /api/AccountGroups
+Implementation Notes
+This method enables application managers to define a new account group automatically, and manage accounts as part of a group.
+
+To create an account group, users require the following permissions in the Safe where the group is created: Add accounts, Update account content, Update account properties, Create folders
+
+Response Class (Status 200)
+The created group information
+
+ModelExample Value
+{
+  "GroupID": "string",
+  "GroupName": "string",
+  "GroupPlatformID": "string",
+  "Safe": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+addAccountGroupData	
+(required)
+
+Parameter content type: 
+application/json
+The account group data
+
+body	
+ModelExample Value
+{
+  "GroupName": "string",
+  "GroupPlatformId": "string",
+  "Safe": "string"
+}
+get /api/AccountGroups/{groupId}/members
+Implementation Notes
+This method returns all the members of an existing account group. These accounts can be either password accounts or SSH Key accounts.
+
+The user performing this task must have the following permissions in the Safe: List Accounts.
+
+Response Class (Status 200)
+List of members for an existing account group
+
+ModelExample Value
+{
+  "AccountID": "string",
+  "SafeName": "string",
+  "PlatformID": "string",
+  "Address": "string",
+  "UserName": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+groupId	
+(required)
+The unique ID of the group.
+
+path	string
+post /api/AccountGroups/{groupId}/members
+Implementation Notes
+This method adds an account as a member to an existing account group.
+
+The account can contain either a password or an SSH key. All members of an account group must be stored in the same Safe as the group itself.
+
+To add an account as a member to an account group, users require the following permissions in the Safe where the group is created: Add accounts, Update account content, Update account properties.
+
+Response Class (Status 200)
+The added member data
+
+ModelExample Value
+{
+  "AccountId": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+groupId	
+(required)
+The unique ID of account group.
+
+path	string
+addMemberData	
+(required)
+
+Parameter content type: 
+application/json
+The member to add
+
+body	
+ModelExample Value
+{
+  "AccountId": "string"
+}
+delete /api/AccountGroups/{groupId}/members/{accountId}
+Implementation Notes
+This method removes an account member from an account group. This account can be either a password account or an SSH Key account.
+
+The user performing this task must have the following permissions in the Safe: Add accounts, Update account content, Update account properties, Create folders
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+groupId	
+(required)
+The unique ID of the group.
+
+path	string
+accountId	
+(required)
+The unique ID of the account.
+
+path	string
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+204	
+Deleted
+
+AccountsShow/HideList OperationsExpand Operations
+get /api/Accounts
+Implementation Notes
+This method returns a list of all the accounts in the Vault.
+
+The user who runs this web service requires List Accounts permission in the Safe.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "value": [
+    {
+      "categoryModificationTime": 0,
+      "platformId": "string",
+      "safeName": "string",
+      "id": "string",
+      "name": "string",
+      "address": "string",
+      "userName": "string",
+      "secretType": "key",
+      "secret": "string",
+      "platformAccountProperties": {},
+      "secretManagement": {
+        "automaticManagementEnabled": true,
+        "manualManagementReason": "string",
+        "status": "inProcess",
+        "lastModifiedTime": 0,
+        "lastReconciledTime": 0,
+        "lastVerifiedTime": 0
+      },
+      "remoteMachinesAccess": {
+        "remoteMachines": "string",
+        "accessRestrictedToRemoteMachines": true
+      },
+      "createdTime": 0,
+      "deletionTime": 0
+    }
+  ],
+  "count": 0,
+  "nextLink": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+savedFilter	
+query	integer
+search	
+List of keywords separated with space to search in accounts.
+
+query	string
+sort	
+Provide multiple values in new lines.
+Property or properties to sort returned accounts, followed by asc (default) or desc to control sort direction. Multiple sorts are comma-separated. Maximum number of properties is 3.
+
+query	Array[string]
+offset	
+Offset of the first returned account into the collection of results.
+
+query	integer
+limit	
+Maximum number of returned accounts. If not specified, the default value is 50. The maximum number that can be specified is 1000.
+
+query	integer
+filter	
+Search for accounts filtered by specific Safe. Filter=safename eq [safe name]
+
+query	string
+searchType	
+Type of search to perform - if keywords are contained in the relevant account properties values or in the start of the properties values (the later enhances performance)
+
+query	string
+post /api/Accounts
+Implementation Notes
+This method adds a new privileged account or SSH key to the Vault The user who runs this web service requires the following permission in the Vault
+
+Add account AND
+Either
+
+Update password OR
+Update password properties
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+account	
+(required)
+
+Parameter content type: 
+application/json
+body	
+ModelExample Value
+{
+  "categoryModificationTime": 0,
+  "platformId": "string",
+  "safeName": "string",
+  "id": "string",
+  "name": "string",
+  "address": "string",
+  "userName": "string",
+  "secretType": "key",
+  "secret": "string",
+  "platformAccountProperties": {},
+  "secretManagement": {
+    "automaticManagementEnabled": true,
+    "manualManagementReason": "string",
+    "status": "inProcess",
+    "lastModifiedTime": 0,
+    "lastReconciledTime": 0,
+    "lastVerifiedTime": 0
+  },
+  "remoteMachinesAccess": {
+    "remoteMachines": "string",
+    "accessRestrictedToRemoteMachines": true
+  },
+  "createdTime": 0,
+  "deletionTime": 0
+}
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+201	
+Created
+
+ModelExample Value
+{
+  "categoryModificationTime": 0,
+  "platformId": "string",
+  "safeName": "string",
+  "id": "string",
+  "name": "string",
+  "address": "string",
+  "userName": "string",
+  "secretType": "key",
+  "secret": "string",
+  "platformAccountProperties": {},
+  "secretManagement": {
+    "automaticManagementEnabled": true,
+    "manualManagementReason": "string",
+    "status": "inProcess",
+    "lastModifiedTime": 0,
+    "lastReconciledTime": 0,
+    "lastVerifiedTime": 0
+  },
+  "remoteMachinesAccess": {
+    "remoteMachines": "string",
+    "accessRestrictedToRemoteMachines": true
+  },
+  "createdTime": 0,
+  "deletionTime": 0
+}
+patch /api/Accounts/{accountId}
+Implementation Notes
+This method updates an existing account's details.
+
+It isn't mandatory to send all the account’s details.
+
+Any values sent in the request that were changed will be updated.
+
+All other properties values will remain the same.
+
+On each property, the following are the allowed operations:
+
+Replace (to replace the existing value of that property)
+
+Remove (to remove the property from the account)
+
+Add (to add that property to the account)
+
+It is possible to set several properties using the same command using the following structure:
+
+{ "op": "replace", "path": "/platformaccountproperties", "value": "{\"{PropertyID1}\":\"{Value}\",\"{PropertyID2}\":\"{Value}\",\"{PropertyID3}\":\"{Value}\"}"}
+
+When sending several operations on the same property – only the last operation will affect.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "categoryModificationTime": 0,
+  "platformId": "string",
+  "safeName": "string",
+  "id": "string",
+  "name": "string",
+  "address": "string",
+  "userName": "string",
+  "secretType": "key",
+  "secret": "string",
+  "platformAccountProperties": {},
+  "secretManagement": {
+    "automaticManagementEnabled": true,
+    "manualManagementReason": "string",
+    "status": "inProcess",
+    "lastModifiedTime": 0,
+    "lastReconciledTime": 0,
+    "lastVerifiedTime": 0
+  },
+  "remoteMachinesAccess": {
+    "remoteMachines": "string",
+    "accessRestrictedToRemoteMachines": true
+  },
+  "createdTime": 0,
+  "deletionTime": 0
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account to update. This is retrieved by the Get Account Service.
+
+path	string
+accountPatch	
+(required)
+
+Parameter content type: 
+application/json
+body	
+ModelExample Value
+{
+  "Operations": [
+    {
+      "value": {},
+      "path": "string",
+      "op": "string",
+      "from": "string"
+    }
+  ]
+}
+post /api/Accounts/{accountId}/Change
+Implementation Notes
+This method marks the account for an immediate credentials change by the CPM to a new random password.
+
+The user who runs this web service requires the following permission in the Safe where the privileged account is stored: 'Initiate CPM password management operations'
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account.
+
+path	string
+changeProperties	
+(required)
+
+Parameter content type: 
+application/json
+The change credentials properties.
+
+body	
+ModelExample Value
+{
+  "ChangeEntireGroup": true
+}
+post /api/Accounts/{accountId}/CheckIn
+Implementation Notes
+This method checks an exclusive account into the Vault.
+
+If the account is managed automatically by the CPM, after it is checked in, the password is changed immediately.
+
+If the account is managed manually, a notification is sent to a user who is authorized to change the password.
+
+The account is checked in automatically after it has been changed.
+
+The user who runs this web service requires the following permission in the Safe where the privileged account is stored: 'Initiate CPM password management operations'
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account.
+
+path	string
+post /api/Accounts/{accountId}/GrantAdministrativeAccess
+Implementation Notes
+This method requests and receives access to a target Windows machine with administrative rights.
+
+The domain user who runs this web service will be added to the local Administrators group of the target machine.
+
+Make sure that all users who want to request access to the target Windows machine must have the following permission in the Safe: List accounts, Use accounts Make sure that the platform is enabled for ad hoc access at platform level. For more information, see the product documentation.
+
+End user machine environment that will be able to get Ad-Hoc access:
+
+Windows Server 2012/2012R2/2016
+Windows 8, Windows 10
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The local account that will be used to add the logged on user to the Administrators group on the machine.
+
+path	string
+delete /api/Accounts/{accountId}/LinkAccount/{extraPasswordIndex}
+Implementation Notes
+This method enables a user to remove association between linked account and source account. To run this service, the user must have the following Safe member authorizations for the Safe of the source account: List accounts Update account properties Manage Safe - This authorization is needed only in case "RequireManageSafeToClearLinkedAccount" is enabled in the configuration
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account.
+
+path	string
+extraPasswordIndex	
+(required)
+The linked account's extra password index. The index can be for Reconcile account, Logon account, or other linked account that is defined in the Platform configuration.
+
+path	integer
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200	
+OK
+
+post /api/Accounts/{accountId}/Password/Retrieve
+Implementation Notes
+This method enables users to retrieve the password or SSH key of an existing account that is identified by its Account ID. It enables users to specify a reason and ticket ID, if required. This method can be used from v10 and replaces the Get Account Value method.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account.
+
+path	string
+accountContentPrerequisites	
+(required)
+
+Parameter content type: 
+application/json
+The account content prerequisites.
+
+body	
+ModelExample Value
+{
+  "Reason": "string",
+  "TicketId": "string",
+  "TicketingSystem": "string",
+  "isUse": true,
+  "ActionType": "string",
+  "Machine": "string",
+  "Version": 0
+}
+post /api/Accounts/{accountId}/Password/Update
+Implementation Notes
+This method enables users to set the account's credentials and change it in the Vault. This will not affect the credentials on the target device.
+
+The user who runs this web service requires the following permission in the Safe where the privileged account is stored: 'Update password value'
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account.
+
+path	string
+changeProperties	
+(required)
+
+Parameter content type: 
+application/json
+The change properties data.
+
+body	
+ModelExample Value
+{
+  "ChangeEntireGroup": true,
+  "NewCredentials": "string"
+}
+post /api/Accounts/{accountId}/PSMConnect
+Implementation Notes
+This method allows you to connect with an account through PSM using an RDP file or to the PSMGW, by returning RDP settings that can be used with an RDP client application or settings for the PSMGW.
+
+It requires the PVWA and PSM to be configured for transparent connections through PSM with RDP files or with PSMGW configuration.
+
+For more information, refer to Configuring the PSM Session User Experience for Connections Through PVWA in the documentation.
+
+Note that the Accept header can be passed to receive the connection data as application/json
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account to retrieve and use to connect to the target system through PSM.
+
+path	string
+request	
+(required)
+
+Parameter content type: 
+application/json
+The information of the request to connect.
+
+body	
+ModelExample Value
+{
+  "Reason": "string",
+  "TicketingSystemName": "string",
+  "TicketId": "string",
+  "ConnectionType": "string",
+  "ConnectionComponent": "string",
+  "ConnectionParams": {}
+}
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200	
+The content of an RDP file. For example: full address: 10.10.11.70 server port: 3389 username: s:PSM@1d6de91fCan also be PSMGW JSON response depending on the configuration for example: {"PSMGWURL": https://1.1.1.1:8443/guac/direct, "PSMGWRequest": <Base64EncodedRequest>}The PSMGW can be connected via post request to the given URL with the body parameter as json
+
+post /api/Accounts/{accountId}/Reconcile
+Implementation Notes
+This method marks an account for automatic reconciliation by the CPM.
+
+The user who runs this web service requires the following permission in the Safe where the privileged account is stored: 'Initiate CPM password management operations'
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account.
+
+path	string
+post /api/Accounts/{accountId}/RevokeAdministrativeAccess
+Implementation Notes
+This method revokes JIT access to a target Windows machine with administrative rights. The domain user who runs this web service will be removed from the local Administrators group of the target machine.
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The local account for the target machine on which the logged on user will be removed from the Administrators group
+
+path	string
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200	
+OK
+
+post /api/Accounts/{accountId}/Secret/Generate
+Implementation Notes
+This method allows generates a new password for an existing account or based on a given complexity. The new password will be returned, but not stored on the account. Given an account, the old password and complexity will be taken from the account and account's platform respectfully.
+
+Response Class (Status 200)
+Generates a new password for an existing account.
+
+ModelExample Value
+[
+  {
+    "Password": "string"
+  }
+]
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accDetails	
+(required)
+
+Parameter content type: 
+application/json
+body	
+ModelExample Value
+{
+  "AccountId": "string"
+}
+accountId	
+(required)
+Unique ID of the account.
+
+path	string
+post /api/Accounts/{accountId}/Secret/Retrieve
+Implementation Notes
+This method allows users to retrieve a private SSH key file to their local computer. It enables users to specify a reason and Ticket ID. The private SSH key file is from an existing account that is identified by its Account ID.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account.
+
+path	string
+accountContentPrerequisites	
+(required)
+
+Parameter content type: 
+application/json
+The account content prerequisites.
+
+body	
+ModelExample Value
+{
+  "Reason": "string",
+  "TicketId": "string",
+  "TicketingSystem": "string",
+  "isUse": true,
+  "ActionType": "string",
+  "Machine": "string",
+  "Version": 0
+}
+get /api/Accounts/{accountId}/Secret/Versions
+Implementation Notes
+This method returns all secret versions. In order to run this method, the user needs the following Safe member authorization: List Accounts View Safe Members
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+[
+  {
+    "versionID": 0,
+    "modifiedBy": "string",
+    "modificationDate": 0,
+    "isTemporary": true
+  }
+]
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account.
+
+path	string
+showTemporary	
+Whether to return both real and temporary password version or only real.
+
+query	boolean
+post /api/Accounts/{accountId}/SetNextPassword
+Implementation Notes
+This method gives the ability to set the account's credentials for the next CPM change.
+
+The user who runs this web service requires the following permissions in the Safe where the privileged account is stored: 'Initiate CPM password management operations', 'Specify next password value'
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account.
+
+path	string
+changeProperties	
+(required)
+
+Parameter content type: 
+application/json
+change properties data.
+
+body	
+ModelExample Value
+{
+  "NewCredentials": "string",
+  "ChangeImmediately": true
+}
+post /api/Accounts/{accountId}/Verify
+Implementation Notes
+This method marks an account for verification by the CPM, and can be used in versions from v9.10.
+
+The user who runs this web service requires the following permission in the Safe where the privileged account is stored: 'Initiate CPM password management operations'
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+accountId	
+(required)
+The unique ID of the account.
+
+path	string
+delete /api/Accounts/{id}
+Implementation Notes
+This method deletes a specific account in the Vault. The user who runs this web service requires Delete Accounts permission in the Vault
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+id	
+(required)
+The account's unique ID, composed of the SafeID and internal AccountID of the account to delete.
+
+path	string
+get /api/Accounts/{id}
+Implementation Notes
+This method returns information about an account identified by its id.
+
+The user who runs this web service requires List Accounts permission in the Vault.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "categoryModificationTime": 0,
+  "platformId": "string",
+  "safeName": "string",
+  "id": "string",
+  "name": "string",
+  "address": "string",
+  "userName": "string",
+  "secretType": "key",
+  "secret": "string",
+  "platformAccountProperties": {},
+  "secretManagement": {
+    "automaticManagementEnabled": true,
+    "manualManagementReason": "string",
+    "status": "inProcess",
+    "lastModifiedTime": 0,
+    "lastReconciledTime": 0,
+    "lastVerifiedTime": 0
+  },
+  "remoteMachinesAccess": {
+    "remoteMachines": "string",
+    "accessRestrictedToRemoteMachines": true
+  },
+  "createdTime": 0,
+  "deletionTime": 0
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+id	
+(required)
+The account's unique ID.
+
+path	string
+post /api/Accounts/{id}/LinkAccount
+Implementation Notes
+This method gives the ability to associate a linked account that already exists on the account level. It can be Reconcile, Logon Account or other linked account which is defined in the platform configuration. Please not: The type of linked accounts allowed are determined in the platform settings. Not every platform supports every type of linked account. In order to run this service the user needs the following Safe member authorization (the safe of the linked account): List accounts Update account properties
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+id	
+(required)
+The unique ID of the account.
+
+path	string
+linkAccount	
+(required)
+
+Parameter content type: 
+application/json
+The details of the linked account.
+
+body	
+ModelExample Value
+{
+  "name": "string",
+  "safe": "string",
+  "folder": "string",
+  "extraPasswordIndex": 0
+}
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200	
+OK
+
+post /api/Accounts/AdHocConnect
+Implementation Notes
+This method allows you to connect through PSM without using an existing account, by returning RDP settings that can be used with an RDP client application or settings for the PSMGW.
+
+You must enable the Privileged Session Monitoring and Secure Connect via the PVWA configuration.
+
+For more information, refer to Configuring the PSM Session User Experience for Connections Through PVWA in the Privileged Account Security Implementation Guide.
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+connectionData	
+(required)
+
+Parameter content type: 
+application/json
+The information for the connection request.
+
+body	
+ModelExample Value
+{
+  "secret": "string",
+  "address": "string",
+  "userName": "string",
+  "platformId": "string",
+  "PSMConnectPrerequisites": {
+    "Reason": "string",
+    "TicketingSystemName": "string",
+    "TicketId": "string",
+    "ConnectionType": "string",
+    "ConnectionComponent": "string",
+    "ConnectionParams": {}
+  },
+  "extraFields": {}
+}
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200	
+The content of an RDP file. For example: full address: 10.10.11.70 server port: 3389 username: s:PSM@1d6de91f. Can also be PSMGW JSON response depending on the configuration for example: {"PSMGWURL": https://1.1.1.1:8443/guac/direct, "PSMGWRequest": <Base64EncodedRequest>}. The PSMGW can be connected via post request to the given URL with the body parameter as json
+
+post /api/Accounts/PersonalAdminAccount
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+account	
+(required)
+
+Parameter content type: 
+application/json
+body	
+ModelExample Value
+{
+  "categoryModificationTime": 0,
+  "id": "string",
+  "name": "string",
+  "address": "string",
+  "userName": "string",
+  "secretType": "key",
+  "secret": "string",
+  "platformAccountProperties": {},
+  "secretManagement": {
+    "automaticManagementEnabled": true,
+    "manualManagementReason": "string",
+    "status": "inProcess",
+    "lastModifiedTime": 0,
+    "lastReconciledTime": 0,
+    "lastVerifiedTime": 0
+  },
+  "remoteMachinesAccess": {
+    "remoteMachines": "string",
+    "accessRestrictedToRemoteMachines": true
+  },
+  "createdTime": 0,
+  "deletionTime": 0
+}
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+201	
+Created
+
+ModelExample Value
+{
+  "categoryModificationTime": 0,
+  "platformId": "string",
+  "safeName": "string",
+  "id": "string",
+  "name": "string",
+  "address": "string",
+  "userName": "string",
+  "secretType": "key",
+  "secret": "string",
+  "platformAccountProperties": {},
+  "secretManagement": {
+    "automaticManagementEnabled": true,
+    "manualManagementReason": "string",
+    "status": "inProcess",
+    "lastModifiedTime": 0,
+    "lastReconciledTime": 0,
+    "lastVerifiedTime": 0
+  },
+  "remoteMachinesAccess": {
+    "remoteMachines": "string",
+    "accessRestrictedToRemoteMachines": true
+  },
+  "createdTime": 0,
+  "deletionTime": 0
+}
+AuthShow/HideList OperationsExpand Operations
+post /api/Auth/{type}/Logon
+post /api/Auth/Logoff
+Automatic Onboarding RulesShow/HideList OperationsExpand Operations
+Bulk AccountsShow/HideList OperationsExpand Operations
+Components Monitoring DetailsShow/HideList OperationsExpand Operations
+Components Monitoring SummaryShow/HideList OperationsExpand Operations
+get /api/ComponentsMonitoringSummary
+Implementation Notes
+This method returns consolidated information about the Vault, PVWA, CPM, PSM/PSMP, and AIM, including all clients that are relevant to each specific component.
+
+Response Class (Status 200)
+The relevant consolidated information
+
+ModelExample Value
+{
+  "Components": [
+    {
+      "ComponentID": "string",
+      "ComponentName": "string",
+      "Description": "string",
+      "ConnectedComponentCount": 0,
+      "ComponentTotalCount": 0,
+      "ComponentSpecificStat": 0
+    }
+  ],
+  "Vaults": [
+    {
+      "IP": "string",
+      "Role": "string",
+      "IsLoggedOn": true
+    }
+  ]
+}
+
+
+Response Content Type 
+application/json
+Allowed Referrer ConfigurationShow/HideList OperationsExpand Operations
+get /api/Configuration/AccessRestriction/AllowedReferrers
+Implementation Notes
+This method returns the allowed referrer list. This means access is allowed from all URLs in the list, to the PVWA. Any user who is a member of the Vault admins group can run this web service.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+[
+  {
+    "referrerURL": "string",
+    "regularExpression": true
+  }
+]
+
+
+Response Content Type 
+application/json
+post /api/Configuration/AccessRestriction/AllowedReferrers
+Implementation Notes
+This method adds a web application URL to the allowed referrer list.This means access is allowed from the URL to the PVWA. The user who runs this web service must belong to the Vault Administrators group.
+
+Response Class (Status 200)
+The added member data
+
+ModelExample Value
+{
+  "referrerURL": "string",
+  "regularExpression": true
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+item	
+(required)
+
+Parameter content type: 
+application/json
+The URL from where users will be able to access PVWA
+
+body	
+ModelExample Value
+{
+  "referrerURL": "string",
+  "regularExpression": true
+}
+Authentication Method ConfigurationsShow/HideList OperationsExpand Operations
+get /api/Configuration/AuthenticationMethods
+Implementation Notes
+This method returns a list of all existing authentication methods. Any user who is a member of the Vault Admins group can run this web service.
+
+Response Class (Status 200)
+List of authentication methods
+
+ModelExample Value
+{
+  "Methods": [
+    {
+      "id": "AuthenticationMethodId",
+      "displayName": "AuthenticationMethodId",
+      "enabled": false,
+      "logoffUrl": "https://domain.com/provider/logoff",
+      "secondFactorAuth": "cyberark",
+      "signInLabel": "",
+      "usernameFieldLabel": "username",
+      "passwordFieldLabel": "password"
+    }
+  ]
+}
+
+
+Response Content Type 
+application/json
+post /api/Configuration/AuthenticationMethods
+Implementation Notes
+This method adds a new authentication method. Any user who is a member of the Vault Admins group can run this web service.
+
+Response Class (Status 201)
+Created
+
+ModelExample Value
+{
+  "id": "AuthenticationMethodId",
+  "displayName": "AuthenticationMethodId",
+  "enabled": false,
+  "logoffUrl": "https://domain.com/provider/logoff",
+  "secondFactorAuth": "cyberark",
+  "signInLabel": "",
+  "usernameFieldLabel": "username",
+  "passwordFieldLabel": "password"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+authenticationMethod	
+(required)
+
+Parameter content type: 
+application/json
+The authentication method information
+
+body	
+ModelExample Value
+{
+  "id": "AuthenticationMethodId",
+  "displayName": "AuthenticationMethodId",
+  "enabled": false,
+  "logoffUrl": "https://domain.com/provider/logoff",
+  "secondFactorAuth": "cyberark",
+  "signInLabel": "",
+  "usernameFieldLabel": "username",
+  "passwordFieldLabel": "password"
+}
+delete /api/Configuration/AuthenticationMethods/{id}
+Implementation Notes
+This method deletes a specific authentication method. The user who runs this web service must belong to the Vault Administrators group.
+
+Response Class (Status 204)
+The authentication method was deleted.
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+id	
+(required)
+The authentication method unique identifier.
+
+path	string
+get /api/Configuration/AuthenticationMethods/{id}
+Implementation Notes
+This method returns a specific authentication method. Any user who is a member of the Vault Admins group can run this web service.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "id": "AuthenticationMethodId",
+  "displayName": "AuthenticationMethodId",
+  "enabled": false,
+  "logoffUrl": "https://domain.com/provider/logoff",
+  "secondFactorAuth": "cyberark",
+  "signInLabel": "",
+  "usernameFieldLabel": "username",
+  "passwordFieldLabel": "password"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+id	
+(required)
+The authentication method unique identifier.
+
+path	string
+put /api/Configuration/AuthenticationMethods/{id}
+Implementation Notes
+This method updates the properties for a specific authentication method. Any user who is a member of the Vault Admins group can run this web service.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "id": "AuthenticationMethodId",
+  "displayName": "AuthenticationMethodId",
+  "enabled": false,
+  "logoffUrl": "https://domain.com/provider/logoff",
+  "secondFactorAuth": "cyberark",
+  "signInLabel": "",
+  "usernameFieldLabel": "username",
+  "passwordFieldLabel": "password"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+id	
+(required)
+The authentication method unique identifier.
+
+path	string
+value	
+(required)
+
+Parameter content type: 
+application/json
+The authentication method information
+
+body	
+ModelExample Value
+{
+  "displayName": "AuthenticationMethodId",
+  "enabled": false,
+  "logoffUrl": "https://domain.com/provider/logoff",
+  "secondFactorAuth": "cyberark",
+  "signInLabel": "",
+  "usernameFieldLabel": "",
+  "passwordFieldLabel": ""
+}
+LDAP DirectoriesShow/HideList OperationsExpand Operations
+get /api/Configuration/LDAP/Directories
+Implementation Notes
+This method returns a list of existing directories in the Vault.
+
+Each directory will be returned with its own data.
+
+To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+[
+  {
+    "DomainName": "string",
+    "DomainBaseContext": "string"
+  }
+]
+
+
+Response Content Type 
+application/json
+post /api/Configuration/LDAP/Directories
+Implementation Notes
+This method creates a directory in the Vault.
+
+Any user who is a member of the Vault Admins group can run this WS.
+
+Note: The BindUsername and BindPassword parameters are only optional if you have the bind user account already onboarded to the Vault Internal safe (the account name must be DomainName.pass)
+
+Response Class (Status 201)
+The created ldap directory
+
+ModelExample Value
+{
+  "DirectoryType": "string",
+  "BindUsername": "string",
+  "BindPassword": "string",
+  "Port": 0,
+  "SSLConnect": true,
+  "LDAPDirectoryName": "string",
+  "LDAPDirectoryQueryOrder": 0,
+  "LDAPDirectoryDescription": "string",
+  "VaultObjectNamesPrefix": "string",
+  "PasswordObjectPath": "string",
+  "LDAPDirectoryGroupBaseContext": "string",
+  "ReferralsChasingHopLimit": 0,
+  "AppendFriendlyDomainNameToGroup": true,
+  "RequireReferredDirectoryDefinition": true,
+  "ReferralsDNSLookup": true,
+  "DisableUserEnumeration": true,
+  "AdditionalQueryFilterOptimize": true,
+  "ClientBrowsing": true,
+  "ExternalObjectCreation": true,
+  "Authentication": true,
+  "UseLDAPCertificatesOnly": true,
+  "DisablePaging": true,
+  "ProvisionDisabledUsers": true,
+  "LDAPDirectoryUsage": [
+    1
+  ],
+  "DCList": [
+    {
+      "Name": "string",
+      "Port": 0,
+      "SSLConnect": true
+    }
+  ],
+  "DomainName": "string",
+  "DomainBaseContext": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+directory	
+(required)
+
+Parameter content type: 
+application/json
+The new ldap directory.
+
+body	
+ModelExample Value
+{
+  "DirectoryType": "string",
+  "BindUsername": "string",
+  "BindPassword": "string",
+  "Port": 0,
+  "SSLConnect": true,
+  "LDAPDirectoryName": "string",
+  "LDAPDirectoryQueryOrder": 0,
+  "LDAPDirectoryDescription": "string",
+  "VaultObjectNamesPrefix": "string",
+  "PasswordObjectPath": "string",
+  "LDAPDirectoryGroupBaseContext": "string",
+  "ReferralsChasingHopLimit": 0,
+  "AppendFriendlyDomainNameToGroup": true,
+  "RequireReferredDirectoryDefinition": true,
+  "ReferralsDNSLookup": true,
+  "DisableUserEnumeration": true,
+  "AdditionalQueryFilterOptimize": true,
+  "ClientBrowsing": true,
+  "ExternalObjectCreation": true,
+  "Authentication": true,
+  "UseLDAPCertificatesOnly": true,
+  "DisablePaging": true,
+  "ProvisionDisabledUsers": true,
+  "LDAPDirectoryUsage": [
+    1
+  ],
+  "DCList": [
+    {
+      "Name": "string",
+      "Port": 0,
+      "SSLConnect": true
+    }
+  ],
+  "DomainName": "string",
+  "DomainBaseContext": "string"
+}
+delete /api/Configuration/LDAP/Directories/{directoryName}
+Implementation Notes
+This method deletes a specific directory configuration along with its mappings.
+
+The user that runs this service must be a member of the Vault Admins group and have the following Vault authorizations: Audit users, Add/Update users, Manage Directory mappings, Add Safes, Reset Users Passwords, Activate Users, Add Network Areas, and Manage Server File Categories Note: After a directory is deleted, all LDAP users that were created in the Vault and mapped to this directory will be automatically deleted during the next periodic LDAP synchronization.
+
+Response Class (Status 204)
+The directory was deleted.
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+directoryName	
+(required)
+The unique ID of the directory.
+
+path	string
+get /api/Configuration/LDAP/Directories/{directoryName}
+Implementation Notes
+This method returns all the details of a specific directory that is defined in the Vault.
+
+To run this web service, the user must be a member of the Vault Admins group and have Audit Users permissions.
+
+Note: be sure to add '/' at the end of the URL of this web service.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "DirectoryType": "string",
+  "BindUsername": "string",
+  "BindPassword": "string",
+  "Port": 0,
+  "SSLConnect": true,
+  "LDAPDirectoryName": "string",
+  "LDAPDirectoryQueryOrder": 0,
+  "LDAPDirectoryDescription": "string",
+  "VaultObjectNamesPrefix": "string",
+  "PasswordObjectPath": "string",
+  "LDAPDirectoryGroupBaseContext": "string",
+  "ReferralsChasingHopLimit": 0,
+  "AppendFriendlyDomainNameToGroup": true,
+  "RequireReferredDirectoryDefinition": true,
+  "ReferralsDNSLookup": true,
+  "DisableUserEnumeration": true,
+  "AdditionalQueryFilterOptimize": true,
+  "ClientBrowsing": true,
+  "ExternalObjectCreation": true,
+  "Authentication": true,
+  "UseLDAPCertificatesOnly": true,
+  "DisablePaging": true,
+  "ProvisionDisabledUsers": true,
+  "LDAPDirectoryUsage": [
+    1
+  ],
+  "DCList": [
+    {
+      "Name": "string",
+      "Port": 0,
+      "SSLConnect": true
+    }
+  ],
+  "DomainName": "string",
+  "DomainBaseContext": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+directoryName	
+(required)
+The address/DNS name of the domain.
+
+path	string
+get /api/Configuration/LDAP/Directories/{directoryName}/Mappings
+Implementation Notes
+This method returns a list of existing directory mappings in the Vault.
+
+To run this web service, the user must be a member of the Vault Admins group and have permissions to "Manage Directory Mapping" (Vault Authorization).
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+[
+  {
+    "LDAPBranch": "string",
+    "VaultGroups": [
+      "string"
+    ],
+    "MappingAuthorizations": [
+      "AddUpdateUsers"
+    ],
+    "Location": "string",
+    "AuthenticationMethod": [
+      "AuthTypePass"
+    ],
+    "UserType": "string",
+    "DisableUser": true,
+    "UserActivityLogPeriod": 0,
+    "UserExpiration": 0,
+    "LogonFromHour": 0,
+    "LogonToHour": 0,
+    "MappingID": 0,
+    "DirectoryMappingOrder": 0,
+    "MappingName": "string",
+    "LDAPQuery": "string",
+    "DomainGroups": [
+      "string"
+    ]
+  }
+]
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+directoryName	
+(required)
+Directory name
+
+path	string
+post /api/Configuration/LDAP/Directories/{directoryName}/Mappings
+Implementation Notes
+This method creates a directory mapping in the Vault. The user who runs this web service must be a member of the Vault Admins group and have the following Vault authorizations: "Audit users", "Add/Update users", and "Manage Directory mappings".
+
+Response Class (Status 201)
+The mapping has been created.
+
+ModelExample Value
+{
+  "LDAPBranch": "string",
+  "VaultGroups": [
+    "string"
+  ],
+  "MappingAuthorizations": [
+    "AddUpdateUsers"
+  ],
+  "Location": "string",
+  "AuthenticationMethod": [
+    "AuthTypePass"
+  ],
+  "UserType": "string",
+  "DisableUser": true,
+  "UserActivityLogPeriod": 0,
+  "UserExpiration": 0,
+  "LogonFromHour": 0,
+  "LogonToHour": 0,
+  "MappingID": 0,
+  "DirectoryMappingOrder": 0,
+  "MappingName": "string",
+  "LDAPQuery": "string",
+  "DomainGroups": [
+    "string"
+  ]
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+directoryName	
+(required)
+The unique ID of the directory.
+
+path	string
+mappingData	
+(required)
+
+Parameter content type: 
+application/json
+LDAP Mapping Data
+
+body	
+ModelExample Value
+{
+  "LDAPBranch": "string",
+  "VaultGroups": [
+    "string"
+  ],
+  "MappingAuthorizations": [
+    "AddUpdateUsers"
+  ],
+  "Location": "string",
+  "AuthenticationMethod": [
+    "AuthTypePass"
+  ],
+  "UserType": "string",
+  "DisableUser": true,
+  "UserActivityLogPeriod": 0,
+  "UserExpiration": 0,
+  "LogonFromHour": 0,
+  "LogonToHour": 0,
+  "MappingID": 0,
+  "DirectoryMappingOrder": 0,
+  "MappingName": "string",
+  "LDAPQuery": "string",
+  "DomainGroups": [
+    "string"
+  ]
+}
+delete /api/Configuration/LDAP/Directories/{directoryName}/Mappings/{mappingID}
+Implementation Notes
+This method deletes a specific directory mapping. The user that runs this service must be a member of the Vault Admins group, and have the following authorizations:
+
+Manage Directory Mapping authorization
+Have all the same authorizations that the mapping has Note: After a mapping is deleted, LDAP users created in the Vault and mapped to this mapping are automatically deleted from the Vault during the next periodic LDAP synchronization.
+Response Class (Status 204)
+The directory mapping was deleted.
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+directoryName	
+(required)
+The Directory name
+
+path	string
+mappingID	
+(required)
+The Mapping id
+
+path	long
+get /api/Configuration/LDAP/Directories/{directoryName}/Mappings/{mappingID}
+Implementation Notes
+This method returns all the details of specific directory mapping that is defined in the Vault. To run this web service, the user must be a member of the Vault Admins group and have permissions to "Manage Directory Mapping" (Vault Authorization).
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "LDAPBranch": "string",
+  "VaultGroups": [
+    "string"
+  ],
+  "MappingAuthorizations": [
+    "AddUpdateUsers"
+  ],
+  "Location": "string",
+  "AuthenticationMethod": [
+    "AuthTypePass"
+  ],
+  "UserType": "string",
+  "DisableUser": true,
+  "UserActivityLogPeriod": 0,
+  "UserExpiration": 0,
+  "LogonFromHour": 0,
+  "LogonToHour": 0,
+  "MappingID": 0,
+  "DirectoryMappingOrder": 0,
+  "MappingName": "string",
+  "LDAPQuery": "string",
+  "DomainGroups": [
+    "string"
+  ]
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+directoryName	
+(required)
+The address/DNS name of the domain.
+
+path	string
+mappingID	
+(required)
+Unique ID of the directory mapping.
+
+path	long
+put /api/Configuration/LDAP/Directories/{directoryName}/Mappings/{mappingID}
+Implementation Notes
+This method edits an existing directory mapping. Every user that is a member of the Vault Admins group and has the following Vault authorizations can run this web service:
+
+"Audit users" "Add/Update users" "Manage Directory mappings"
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "LDAPBranch": "string",
+  "VaultGroups": [
+    "string"
+  ],
+  "MappingAuthorizations": [
+    "AddUpdateUsers"
+  ],
+  "Location": "string",
+  "AuthenticationMethod": [
+    "AuthTypePass"
+  ],
+  "UserType": "string",
+  "DisableUser": true,
+  "UserActivityLogPeriod": 0,
+  "UserExpiration": 0,
+  "LogonFromHour": 0,
+  "LogonToHour": 0,
+  "MappingID": 0,
+  "DirectoryMappingOrder": 0,
+  "MappingName": "string",
+  "LDAPQuery": "string",
+  "DomainGroups": [
+    "string"
+  ]
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+directoryName	
+(required)
+Directory name
+
+path	string
+mappingID	
+(required)
+Mapping ID
+
+path	long
+mappingToEdit	
+(required)
+
+Parameter content type: 
+application/json
+Updated Mapping data
+
+body	
+ModelExample Value
+{
+  "LDAPBranch": "string",
+  "VaultGroups": [
+    "string"
+  ],
+  "MappingAuthorizations": [
+    "AddUpdateUsers"
+  ],
+  "Location": "string",
+  "AuthenticationMethod": [
+    "AuthTypePass"
+  ],
+  "UserType": "string",
+  "DisableUser": true,
+  "UserActivityLogPeriod": 0,
+  "UserExpiration": 0,
+  "LogonFromHour": 0,
+  "LogonToHour": 0,
+  "MappingID": 0,
+  "DirectoryMappingOrder": 0,
+  "MappingName": "string",
+  "LDAPQuery": "string",
+  "DomainGroups": [
+    "string"
+  ]
+}
+post /api/Configuration/LDAP/Directories/{directoryName}/Mappings/Reorder
+Implementation Notes
+This method modifies the order of all mappings that belong to a specific directory.Modifying the order of the mappings changes their priority. The user that runs this service must be a member of the Vault Admins group and have the following authorizations:
+
+Audit users
+Add/Update users
+Manage Directory mappings
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+directoryName	
+(required)
+The directory name
+
+path	string
+mappingsOrder	
+(required)
+
+Parameter content type: 
+application/json
+The new order of the mappings, sorted by importance. Must include all mappings. Each ID can only appear once.
+
+body	
+ModelExample Value
+{
+  "MappingsOrder": [
+    0
+  ]
+}
+OIDC ConfigurationShow/HideList OperationsExpand Operations
+get /api/Configuration/OIDC/Providers
+Implementation Notes
+This method return a list of all OIDC Identity Providers.
+
+The user that runs this service must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "Providers": [
+    {
+      "id": "string",
+      "authenticationFlow": "Code",
+      "authenticationEndpointUrl": "string",
+      "issuer": "string",
+      "description": "string",
+      "jwkSet": "string",
+      "clientId": "string",
+      "clientSecret": "string",
+      "clientSecretMethod": "Basic",
+      "discoveryEndpointUrl": "string",
+      "userNameClaim": "string"
+    }
+  ]
+}
+
+
+Response Content Type 
+application/json
+post /api/Configuration/OIDC/Providers
+Implementation Notes
+This method creates an OIDC Identity Provider in the Vault.
+
+The user that runs this service must be a member of the Vault Admins group.
+
+Response Class (Status 201)
+Created
+
+ModelExample Value
+{
+  "id": "string",
+  "authenticationFlow": "Code",
+  "authenticationEndpointUrl": "string",
+  "issuer": "string",
+  "description": "string",
+  "jwkSet": "string",
+  "clientId": "string",
+  "clientSecret": "string",
+  "clientSecretMethod": "Basic",
+  "discoveryEndpointUrl": "string",
+  "userNameClaim": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+configurationData	
+(required)
+
+Parameter content type: 
+application/json
+The OP configuration data
+
+body	
+ModelExample Value
+{
+  "id": "string",
+  "authenticationFlow": "Code",
+  "authenticationEndpointUrl": "string",
+  "issuer": "string",
+  "description": "string",
+  "jwkSet": "string",
+  "clientId": "string",
+  "clientSecret": "string",
+  "clientSecretMethod": "Basic",
+  "discoveryEndpointUrl": "string",
+  "userNameClaim": "string"
+}
+delete /api/Configuration/OIDC/Providers/{id}
+Implementation Notes
+This method deletes a specific OIDC Identity Provider.
+
+The user that runs this service must be a member of the Vault Admins group.
+
+Response Class (Status 204)
+The provider was deleted.
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+id	
+(required)
+The unique identifier of the provider. This ID is used to identify the OIDC Identity Provider in PVWA.
+
+path	string
+get /api/Configuration/OIDC/Providers/{id}
+Implementation Notes
+This method returns a specific OIDC Identity Provider.
+
+The user that runs this service must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "id": "string",
+  "authenticationFlow": "Code",
+  "authenticationEndpointUrl": "string",
+  "issuer": "string",
+  "description": "string",
+  "jwkSet": "string",
+  "clientId": "string",
+  "clientSecret": "string",
+  "clientSecretMethod": "Basic",
+  "discoveryEndpointUrl": "string",
+  "userNameClaim": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+id	
+(required)
+The unique identifier of the provider. This ID is used to identify the OIDC Identity Provider in PVWA.
+
+path	string
+put /api/Configuration/OIDC/Providers/{id}
+Implementation Notes
+This method updates an existing OIDC Identity Provider.
+
+The user that runs this service must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+Provider updated
+
+ModelExample Value
+{
+  "Id": "string",
+  "JWKs": "string",
+  "Flow": "Code",
+  "AuthenticationEndpointUrl": "string",
+  "TokenEndpointUrl": "string",
+  "Issuer": "string",
+  "Description": "string",
+  "ClientId": "string",
+  "ClientSecretFileName": "string",
+  "ClientSecretMethod": "Basic",
+  "DiscoveryEndpointUrl": "string",
+  "UserNameClaim": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+id	
+(required)
+The unique identifier of the provider. This ID is used to identify the OIDC Identity Provider in PVWA.
+
+path	string
+configurationData	
+(required)
+
+Parameter content type: 
+application/json
+The updated configuration data
+
+body	
+ModelExample Value
+{
+  "authenticationFlow": "Code",
+  "authenticationEndpointUrl": "string",
+  "issuer": "string",
+  "description": "string",
+  "jwkSet": "string",
+  "clientId": "string",
+  "clientSecret": "string",
+  "clientSecretMethod": "Basic",
+  "discoveryEndpointUrl": "string",
+  "userNameClaim": "string"
+}
+Connection ComponentsShow/HideList OperationsExpand Operations
+post /api/ConnectionComponents/import
+Implementation Notes
+This method allows administrators to import a new connection component.
+
+Response Class (Status 200)
+The unique ID of the connection component
+
+ModelExample Value
+{
+  "ConnectionComponentID": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+importConnectionComponent	
+(required)
+
+Parameter content type: 
+application/json
+The ZIP file containing the connection component and additional configuration parameters.
+
+body	
+ModelExample Value
+{
+  "ImportFile": "string"
+}
+Discovered AccountsShow/HideList OperationsExpand Operations
+delete /api/DiscoveredAccounts
+Implementation Notes
+This method deletes all discovered accounts and related dependencies from the Pending Accounts list.
+
+To run this web service, the user must be a member of the Vault admins group.
+
+Note: When thousands of accounts are deleted, it may take a few minutes to complete the process.
+
+Response Class (Status 204)
+The discovered accounts were deleted.
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+get /api/DiscoveredAccounts
+Implementation Notes
+This method returns a list of all the discovered accounts from the Pending Accounts list.
+
+To run this web service, the user must be a member of the Vault admins group.
+
+Note: Discovered accounts that were onboarded either manually or automatically, according to predefined rules, won't be returned using this method.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "value": [
+    {
+      "id": "string",
+      "name": "string",
+      "userName": "string",
+      "address": "string",
+      "discoveryDateTime": 0,
+      "accountEnabled": true,
+      "osGroups": "string",
+      "platformType": "string",
+      "domain": "string",
+      "lastLogonDateTime": 0,
+      "lastPasswordSetDateTime": 0,
+      "passwordNeverExpires": true,
+      "osVersion": "string",
+      "privileged": true,
+      "privilegedCriteria": "string",
+      "userDisplayName": "string",
+      "description": "string",
+      "passwordExpirationDateTime": 0,
+      "osFamily": "Workstation",
+      "organizationalUnit": "string",
+      "additionalProperties": {},
+      "platformTypeAccountProperties": {},
+      "numberOfDependencies": 0,
+      "dependencies": [
+        {
+          "name": "string",
+          "address": "string",
+          "type": "string",
+          "taskFolder": "string"
+        }
+      ]
+    }
+  ],
+  "count": 0,
+  "nextLink": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+search	
+Searches according to REST standard (search="search word").
+
+Search is supported for userName and address.
+
+query	string
+searchType	
+The type of search to perform.
+
+The keyword can either be contained within the account property values, or at the beginning of the value specified in the search parameter.
+
+When using a keyword at the beginning of a value, performance is enhanced.
+
+Valid values: contains (default) or startswith
+
+query	string
+offset	
+The offset of the first returned accounts into the list of results.
+
+query	integer
+limit	
+The maximum number of returned accounts.
+
+If not specified, the server limits the results to 100.
+
+The maximum number that can be specified is 1000.
+
+query	integer
+filter	
+Search for accounts filtered by:
+
+• platformType - Get discovered accounts of a specific platform, using the platform type name.
+
+Usage: filter=platformType eq Windows Server Local
+
+Type: string
+
+Valid values:
+
+    o Windows Server Local
+
+    o Windows Desktop Local
+
+    o Windows Domain
+
+    o Unix
+
+    o Unix SSH Key
+
+    o AWS
+
+    o AWS Access Keys
+
+    o AWS Root Account
+
+    o Azure Password Management
+
+    o Azure Application Keys
+
+    o GCP Service Account
+
+    o GCP User Account
+• privileged - Get only privileged or non-privileged discovered accounts.
+
+Usage: filter=privileged eq true
+
+Type: boolean
+
+Valid values: true/false
+• accountEnabled - Get only enabled or disabled discovered accounts.
+
+Usage: filter=accountEnabled eq true
+
+Type: boolean
+
+Valid values: true/false
+Note: To use more than one filter, you can use the AND operator.
+
+filter=platformType eq Windows Server Local AND privileged eq true
+query	string
+sort	
+Provide multiple values in new lines.
+Property or properties to sort returned discovered accounts, followed by asc (default) or desc to control sort direction. Multiple sorts are comma-separated. Maximum number of properties is 3.
+
+query	Array[string]
+post /api/DiscoveredAccounts
+Implementation Notes
+This method adds newly discovered accounts and their dependencies. Accounts are onboarded according to onboarding rules or added directly to the Pending Accounts list. If the account already exists in the Pending Account list, it will be updated as needed. If the onboarding process fails, the account will be added to the Pending Accounts list. The user that runs this service must have the following ownership and authorizations:
+
+Owner of the PasswordManager_Pending Safe with the following permissions:
+
+Update Account Properties
+Add Account
+List Files
+Owner of the target Safe of the onboarding rule with the following permissions:
+
+Update Account Properties
+Add Account
+Initiate CPM account management operations
+Response Class (Status 201)
+Created
+
+ModelExample Value
+{
+  "id": "string",
+  "status": "string",
+  "userName": "string",
+  "address": "string",
+  "safe": "string",
+  "dependencies": [
+    {
+      "id": "string",
+      "status": "string",
+      "name": "string",
+      "address": "string",
+      "type": "string",
+      "failureReason": "string"
+    }
+  ]
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+discoveredAccount	
+(required)
+
+Parameter content type: 
+application/json
+The discovered account
+
+body	
+ModelExample Value
+{
+  "id": "string",
+  "userName": "string",
+  "address": "string",
+  "discoveryDateTime": 0,
+  "accountEnabled": true,
+  "osGroups": "string",
+  "platformType": "string",
+  "domain": "string",
+  "lastLogonDateTime": 0,
+  "lastPasswordSetDateTime": 0,
+  "passwordNeverExpires": true,
+  "osVersion": "string",
+  "privileged": true,
+  "privilegedCriteria": "string",
+  "userDisplayName": "string",
+  "description": "string",
+  "passwordExpirationDateTime": 0,
+  "osFamily": "Workstation",
+  "additionalProperties": {},
+  "organizationalUnit": "string",
+  "platformTypeAccountProperties": {},
+  "dependencies": [
+    {
+      "name": "string",
+      "address": "string",
+      "type": "string",
+      "taskFolder": "string"
+    }
+  ]
+}
+post /api/DiscoveredAccounts/{discoveredAccountId}/Onboard
+Implementation Notes
+This method onboarding a discovered account
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+discoveredAccountId	
+(required)
+Get Onboarding Platforms request
+
+path	string
+onboardAccount	
+(required)
+
+Parameter content type: 
+application/json
+the onboard account
+
+body	
+ModelExample Value
+{
+  "platformId": "string",
+  "safeName": "string",
+  "shouldReconcileAccount": true,
+  "defaultPassword": "string"
+}
+get /api/DiscoveredAccounts/{id}
+Implementation Notes
+This method returns information about a discovered account and its dependencies from the Pending Accounts list. The discovered account is identified by its ID.
+
+To run this web service, the user must be a member of the Vault admins group.
+
+Note: Discovered accounts that were onboarded either manually or automatically, according to predefined rules, won't be returned using this method.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "id": "string",
+  "name": "string",
+  "userName": "string",
+  "address": "string",
+  "discoveryDateTime": 0,
+  "accountEnabled": true,
+  "osGroups": "string",
+  "platformType": "string",
+  "domain": "string",
+  "lastLogonDateTime": 0,
+  "lastPasswordSetDateTime": 0,
+  "passwordNeverExpires": true,
+  "osVersion": "string",
+  "privileged": true,
+  "privilegedCriteria": "string",
+  "userDisplayName": "string",
+  "description": "string",
+  "passwordExpirationDateTime": 0,
+  "osFamily": "Workstation",
+  "organizationalUnit": "string",
+  "additionalProperties": {},
+  "platformTypeAccountProperties": {},
+  "numberOfDependencies": 0,
+  "dependencies": [
+    {
+      "name": "string",
+      "address": "string",
+      "type": "string",
+      "taskFolder": "string"
+    }
+  ]
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+id	
+(required)
+The account's unique ID.
+
+path	string
+get /api/DiscoveredAccounts/Platforms
+Implementation Notes
+This method returns active platforms according to a Safe.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "Platforms": [
+    {
+      "platformID": "string",
+      "platformName": "string",
+      "isRecommended": true,
+      "isSSHKeysPlatform": true,
+      "isAutomaticReconcileAllowed": true
+    }
+  ]
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+safeName	
+(required)
+The unique name of the Safe.
+
+query	string
+discoveryPlatformType	
+(required)
+The discovery platform type
+
+query	string
+Incoming RequestsShow/HideList OperationsExpand Operations
+get /api/IncomingRequests
+Implementation Notes
+This method returns a list of all the requests for the confirmer to respond to.
+
+Response Class (Status 200)
+List of all the relevant requests
+
+ModelExample Value
+{
+  "RequestorFullName": "string",
+  "RequestID": "string",
+  "SafeName": "string",
+  "RequestorUserName": "string",
+  "RequestorReason": "string",
+  "UserReason": "string",
+  "CreationDate": 0,
+  "Operation": "string",
+  "ExpirationDate": 0,
+  "OperationType": 0,
+  "AccessType": "string",
+  "ConfirmationsLeft": 0,
+  "AccessFrom": 0,
+  "AccessTo": 0,
+  "Status": 0,
+  "StatusTitle": "string",
+  "InvalidRequestReason": 0,
+  "CurrentConfirmationLevel": 0,
+  "RequiredConfirmersCountLevel2": 0,
+  "TicketingSystemProperties": {
+    "Name": "string",
+    "Number": "string",
+    "Status": "string"
+  },
+  "AdditionalInfo": {},
+  "AccountDetails": {
+    "AccountID": "string",
+    "Properties": {}
+  },
+  "Confirmers": [
+    {
+      "Type": 0,
+      "ID": 0,
+      "Name": "string",
+      "Action": 0,
+      "Reason": "string",
+      "ActionDate": 0,
+      "AdditionalDetails": {},
+      "Members": [
+        {
+          "UserID": 0,
+          "UserName": "string",
+          "AdditionalDetails": {}
+        }
+      ]
+    }
+  ]
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+onlyWaiting	
+Only requests waiting for approval will be listed.
+
+query	boolean
+expired	
+Expired requests will be included in the list.
+
+query	boolean
+get /api/IncomingRequests/{RequestID}
+Implementation Notes
+This method returns details of a specific request in the Incoming Requests list.
+
+Response Class (Status 200)
+The relevant request
+
+ModelExample Value
+{
+  "RequestorFullName": "string",
+  "RequestID": "string",
+  "SafeName": "string",
+  "RequestorUserName": "string",
+  "RequestorReason": "string",
+  "UserReason": "string",
+  "CreationDate": 0,
+  "Operation": "string",
+  "ExpirationDate": 0,
+  "OperationType": 0,
+  "AccessType": "string",
+  "ConfirmationsLeft": 0,
+  "AccessFrom": 0,
+  "AccessTo": 0,
+  "Status": 0,
+  "StatusTitle": "string",
+  "InvalidRequestReason": 0,
+  "CurrentConfirmationLevel": 0,
+  "RequiredConfirmersCountLevel2": 0,
+  "TicketingSystemProperties": {
+    "Name": "string",
+    "Number": "string",
+    "Status": "string"
+  },
+  "AdditionalInfo": {},
+  "AccountDetails": {
+    "AccountID": "string",
+    "Properties": {}
+  },
+  "Confirmers": [
+    {
+      "Type": 0,
+      "ID": 0,
+      "Name": "string",
+      "Action": 0,
+      "Reason": "string",
+      "ActionDate": 0,
+      "AdditionalDetails": {},
+      "Members": [
+        {
+          "UserID": 0,
+          "UserName": "string",
+          "AdditionalDetails": {}
+        }
+      ]
+    }
+  ]
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+RequestID	
+(required)
+The unique ID of the request.
+
+path	string
+requestID	
+The unique ID of the request.
+
+query	string
+safeName	
+query	string
+requestorUserName	
+query	string
+requestorReason	
+query	string
+userReason	
+query	string
+creationDate	
+query	long
+operation	
+query	string
+expirationDate	
+query	long
+operationType	
+query	integer
+accessType	
+query	string
+confirmationsLeft	
+query	long
+accessFrom	
+query	long
+accessTo	
+query	long
+status	
+query	integer
+statusTitle	
+query	string
+invalidRequestReason	
+query	integer
+currentConfirmationLevel	
+query	integer
+requiredConfirmersCountLevel2	
+query	integer
+ticketingSystemProperties.name	
+query	string
+ticketingSystemProperties.number	
+query	string
+ticketingSystemProperties.status	
+query	string
+additionalInfo	
+query	undefined
+accountDetails.accountID	
+query	string
+accountDetails.properties	
+query	undefined
+confirmers	
+Provide multiple values in new lines.
+query	Array[]
+post /api/IncomingRequests/{RequestID}/confirm
+Implementation Notes
+This method enables a request confirmer to confirm a single request, identified by its request ID.
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+confirmationInfo	
+(required)
+
+Parameter content type: 
+application/json
+The confirmation info.
+
+body	
+ModelExample Value
+{
+  "Reason": "string"
+}
+RequestID	
+(required)
+The unique ID of the request to confirm.
+
+path	string
+requestorFullName	
+query	string
+requestID	
+The unique ID of the request to confirm.
+
+query	string
+safeName	
+query	string
+requestorUserName	
+query	string
+requestorReason	
+query	string
+userReason	
+query	string
+creationDate	
+query	long
+operation	
+query	string
+expirationDate	
+query	long
+operationType	
+query	integer
+accessType	
+query	string
+confirmationsLeft	
+query	long
+accessFrom	
+query	long
+accessTo	
+query	long
+status	
+query	integer
+statusTitle	
+query	string
+invalidRequestReason	
+query	integer
+currentConfirmationLevel	
+query	integer
+requiredConfirmersCountLevel2	
+query	integer
+ticketingSystemProperties.name	
+query	string
+ticketingSystemProperties.number	
+query	string
+ticketingSystemProperties.status	
+query	string
+additionalInfo	
+query	undefined
+accountDetails.accountID	
+query	string
+accountDetails.properties	
+query	undefined
+confirmers	
+Provide multiple values in new lines.
+query	Array[]
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200		
+post /api/IncomingRequests/{RequestID}/reject
+Implementation Notes
+This method enables a request confirmer to reject a single request, identified by its request ID.
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+rejectionInfo	
+(required)
+
+Parameter content type: 
+application/json
+The confirmation info.
+
+body	
+ModelExample Value
+{
+  "Reason": "string"
+}
+RequestID	
+(required)
+The unique ID of the request to reject.
+
+path	string
+requestorFullName	
+query	string
+requestID	
+The unique ID of the request to reject.
+
+query	string
+safeName	
+query	string
+requestorUserName	
+query	string
+requestorReason	
+query	string
+userReason	
+query	string
+creationDate	
+query	long
+operation	
+query	string
+expirationDate	
+query	long
+operationType	
+query	integer
+accessType	
+query	string
+confirmationsLeft	
+query	long
+accessFrom	
+query	long
+accessTo	
+query	long
+status	
+query	integer
+statusTitle	
+query	string
+invalidRequestReason	
+query	integer
+currentConfirmationLevel	
+query	integer
+requiredConfirmersCountLevel2	
+query	integer
+ticketingSystemProperties.name	
+query	string
+ticketingSystemProperties.number	
+query	string
+ticketingSystemProperties.status	
+query	string
+additionalInfo	
+query	undefined
+accountDetails.accountID	
+query	string
+accountDetails.properties	
+query	undefined
+confirmers	
+Provide multiple values in new lines.
+query	Array[]
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200		
+Live SessionsShow/HideList OperationsExpand Operations
+get /api/LiveSessions
+Implementation Notes
+This method returns details of live sessions.
+
+Response Class (Status 200)
+List of the relevant live sessions
+
+ModelExample Value
+{
+  "CanTerminate": true,
+  "CanMonitor": true,
+  "CanSuspend": true,
+  "SessionID": "string",
+  "SessionGuid": "00000000-0000-0000-0000-000000000000",
+  "SafeName": "string",
+  "FolderName": "string",
+  "IsLive": true,
+  "FileName": "string",
+  "Start": 0,
+  "End": 0,
+  "Duration": 0,
+  "User": "string",
+  "RemoteMachine": "string",
+  "ProtectionDate": 0,
+  "ProtectedBy": "string",
+  "ProtectionEnabled": true,
+  "AccountUsername": "string",
+  "AccountPlatformID": "string",
+  "AccountAddress": "string",
+  "PIMSuCommand": "string",
+  "PIMSuCWD": "string",
+  "ConnectionComponentID": "string",
+  "PSMRecordingEntity": "string",
+  "TicketID": "string",
+  "FromIP": "string",
+  "Protocol": "string",
+  "Client": "string",
+  "RiskScore": 0,
+  "Severity": "string",
+  "IncidentDetails": {
+    "Incident": {
+      "Id": "string",
+      "Url": "string",
+      "Score": 0,
+      "Name": "string",
+      "StartDate": 0
+    },
+    "Sessions": [
+      {
+        "Id": "string",
+        "Score": 0,
+        "Severity": "string",
+        "Commands": [
+          {
+            "Encoded": true,
+            "Value": "string",
+            "Offset": "string",
+            "Score": 0,
+            "Severity": "string"
+          }
+        ]
+      }
+    ]
+  },
+  "RawProperties": {},
+  "RecordingFiles": [
+    {
+      "FileName": "string",
+      "RecordingType": 0,
+      "LastReviewBy": "string",
+      "LastReviewDate": 0,
+      "FileSize": 0,
+      "CompressedFileSize": 0,
+      "Format": "string"
+    }
+  ],
+  "RecordedActivities": [
+    {
+      "ActivityText": "string",
+      "ActivityType": 0,
+      "ActivityId": "string",
+      "Formats": [
+        "string"
+      ],
+      "Offsets": {}
+    }
+  ],
+  "VideoSize": 0,
+  "TextSize": 0,
+  "DetailsUrl": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+returnURL	
+The returned URL.
+
+query	string
+limit	
+Determines the number of lives sessions that are returned in the list. The maximum value is defined in the MaxRecords property in Options -> Privileged Session Management -> General Setting -> Search Properties.
+
+query	long
+offset	
+Determines which recording results will be returned, according to a specific place in the returned list. This value defines the recording's place in the list and how many results will be skipped.
+
+query	long
+useCache	
+query	boolean
+sort	
+Provide multiple values in new lines.
+The sort can be done by each property on the recording file: RiskScore, FileName, SafeName, FolderName, PSMVaultUserName, FromIP, RemoteMachine, Client, Protocol, AccountUserName, AccountAddress, AccountPlatformID, PSMStartTime, TicketID. The sort can be in ascending or descending order. To sort in descending order, specify ' - ' (dash) before the recording property by which to sort.
+
+query	Array[string]
+search	
+Returns lives sessions that are filtered by properties that contain the specified search text.
+
+query	string
+activities	
+Returns lives sessions with specific activities.
+
+query	string
+fromTime	
+Returns lives sessions from a specific date.
+
+query	long
+toTime	
+Returns lives sessions before a specific date.
+
+query	long
+safe	
+Returns lives sessions that use accounts from a specific Safe.
+
+query	string
+get /api/LiveSessions/{liveSessionId}
+Implementation Notes
+This method returns details of an active session.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+liveSessionId	
+(required)
+The unique ID of the PSM Active Session.
+
+path	string
+returnURL	
+query	string
+get /api/LiveSessions/{liveSessionId}/activities
+Implementation Notes
+This method returns activities of an active session.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+liveSessionId	
+(required)
+The unique ID of the PSM Active Session.
+
+path	string
+get /api/LiveSessions/{liveSessionId}/monitor
+Implementation Notes
+This method returns connection data necessary to launch live monitoring of an active PSM session.
+
+Note that the Accept header can be passed to receive the connection data as application/json
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+liveSessionId	
+(required)
+The unique ID of the PSM Active Session.
+
+path	string
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200		
+get /api/LiveSessions/{liveSessionId}/properties
+Implementation Notes
+This method returns properties of an active session.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+liveSessionId	
+(required)
+The unique ID of the PSM Active Session.
+
+path	string
+post /api/LiveSessions/{liveSessionId}/resume
+Implementation Notes
+This method resume a suspended active PSM session and allow the privileged user to continue working with the session.
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+liveSessionId	
+(required)
+The unique ID of the PSM Active Session.
+
+path	string
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200		
+post /api/LiveSessions/{liveSessionId}/suspend
+Implementation Notes
+This method suspend (prevents a user from interacting with an active PSM session) until a security manager resumes the session. Security teams can review the potentially risky session's audit trail to determine whether to allow the privileged user to continue to work with the session.
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+liveSessionId	
+(required)
+The unique ID of the PSM Active Session.
+
+path	string
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200		
+post /api/LiveSessions/{liveSessionId}/terminate
+Implementation Notes
+This method terminates an active PSM session immediately. This enables the system to terminate an active PSM session immediately to prevent high-risk activities.
+
+In the PVWA system configuration, specify the following:
+
+AllowPSMNotifications - Set Privileged Session Management > General settings > Server settings > Live Session Monitoring settings > AllowPSMNotifications to Yes to enable users to suspend active sessions. Note: This parameter is not supported on PSMP and OPM sessions. Terminating Active Sessions Users And Groups - Users need to be added as a user in the Terminating Active Sessions Users And Groups parameter.The default group is PSMLiveSessionTerminators.
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+liveSessionId	
+(required)
+The unique ID of the PSM Active Session.
+
+path	string
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200		
+Logins InfoShow/HideList OperationsExpand Operations
+get /api/LoginsInfo
+Implementation Notes
+This method returns data about the user that is currently logged in to the system.
+
+Response Class (Status 200)
+This method returns data about the User that is currently logged into the system
+
+ModelExample Value
+{
+  "LastSuccessLoginTime": 0,
+  "LastSuccessLoginIP": "string",
+  "FailedLogins": 0,
+  "LastFailLoginTime": 0,
+  "LastFailLoginIP": "string"
+}
+
+
+Response Content Type 
+application/json
+My RequestsShow/HideList OperationsExpand Operations
+get /api/MyRequests
+Implementation Notes
+This method returns a list of the end user's requests.
+
+Response Class (Status 200)
+List of the end user's requests
+
+ModelExample Value
+{
+  "RequestID": "string",
+  "SafeName": "string",
+  "RequestorUserName": "string",
+  "RequestorReason": "string",
+  "UserReason": "string",
+  "CreationDate": 0,
+  "Operation": "string",
+  "ExpirationDate": 0,
+  "OperationType": 0,
+  "AccessType": "string",
+  "ConfirmationsLeft": 0,
+  "AccessFrom": 0,
+  "AccessTo": 0,
+  "Status": 0,
+  "StatusTitle": "string",
+  "InvalidRequestReason": 0,
+  "CurrentConfirmationLevel": 0,
+  "RequiredConfirmersCountLevel2": 0,
+  "TicketingSystemProperties": {
+    "Name": "string",
+    "Number": "string",
+    "Status": "string"
+  },
+  "AdditionalInfo": {},
+  "AccountDetails": {
+    "AccountID": "string",
+    "Properties": {}
+  },
+  "Confirmers": [
+    {
+      "Type": 0,
+      "ID": 0,
+      "Name": "string",
+      "Action": 0,
+      "Reason": "string",
+      "ActionDate": 0,
+      "AdditionalDetails": {},
+      "Members": [
+        {
+          "UserID": 0,
+          "UserName": "string",
+          "AdditionalDetails": {}
+        }
+      ]
+    }
+  ]
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+onlyWaiting	
+"Only requests waiting for approval will be listed.
+
+query	boolean
+expired	
+Expired requests will be included in the list.
+
+query	boolean
+post /api/MyRequests
+Implementation Notes
+This method creates an access request for a specific account. This account may be either a password account or an SSH Key account.
+
+Response Class (Status 200)
+The created request
+
+ModelExample Value
+{
+  "RequestID": "string",
+  "SafeName": "string",
+  "RequestorUserName": "string",
+  "RequestorReason": "string",
+  "UserReason": "string",
+  "CreationDate": 0,
+  "Operation": "string",
+  "ExpirationDate": 0,
+  "OperationType": 0,
+  "AccessType": "string",
+  "ConfirmationsLeft": 0,
+  "AccessFrom": 0,
+  "AccessTo": 0,
+  "Status": 0,
+  "StatusTitle": "string",
+  "InvalidRequestReason": 0,
+  "CurrentConfirmationLevel": 0,
+  "RequiredConfirmersCountLevel2": 0,
+  "TicketingSystemProperties": {
+    "Name": "string",
+    "Number": "string",
+    "Status": "string"
+  },
+  "AdditionalInfo": {},
+  "AccountDetails": {
+    "AccountID": "string",
+    "Properties": {}
+  },
+  "Confirmers": [
+    {
+      "Type": 0,
+      "ID": 0,
+      "Name": "string",
+      "Action": 0,
+      "Reason": "string",
+      "ActionDate": 0,
+      "AdditionalDetails": {},
+      "Members": [
+        {
+          "UserID": 0,
+          "UserName": "string",
+          "AdditionalDetails": {}
+        }
+      ]
+    }
+  ]
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+request	
+(required)
+
+Parameter content type: 
+application/json
+The request to create.
+
+body	
+ModelExample Value
+{
+  "AccountId": "string",
+  "Reason": "string",
+  "TicketingSystemName": "string",
+  "TicketId": "string",
+  "MultipleAccessRequired": true,
+  "FromDate": 0,
+  "ToDate": 0,
+  "AdditionalInfo": {},
+  "UseConnect": true,
+  "ConnectionComponent": "string",
+  "ConnectionParams": {}
+}
+delete /api/MyRequests/{RequestID}
+Implementation Notes
+This method deletes a request made by a user.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+RequestID	
+(required)
+The request's unique ID, composed of the SafeName and internal RequestID.
+
+path	string
+requestID	
+The request's unique ID, composed of the SafeName and internal RequestID.
+
+query	string
+safeName	
+query	string
+requestorUserName	
+query	string
+requestorReason	
+query	string
+userReason	
+query	string
+creationDate	
+query	long
+operation	
+query	string
+expirationDate	
+query	long
+operationType	
+query	integer
+accessType	
+query	string
+confirmationsLeft	
+query	long
+accessFrom	
+query	long
+accessTo	
+query	long
+status	
+query	integer
+statusTitle	
+query	string
+invalidRequestReason	
+query	integer
+currentConfirmationLevel	
+query	integer
+requiredConfirmersCountLevel2	
+query	integer
+ticketingSystemProperties.name	
+query	string
+ticketingSystemProperties.number	
+query	string
+ticketingSystemProperties.status	
+query	string
+additionalInfo	
+query	undefined
+accountDetails.accountID	
+query	string
+accountDetails.properties	
+query	undefined
+confirmers	
+Provide multiple values in new lines.
+query	Array[]
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+204	
+Deleted
+
+get /api/MyRequests/{RequestID}
+Implementation Notes
+This method returns details of all the requests in My Requests list.
+
+Response Class (Status 200)
+The relevant request
+
+ModelExample Value
+{
+  "RequestID": "string",
+  "SafeName": "string",
+  "RequestorUserName": "string",
+  "RequestorReason": "string",
+  "UserReason": "string",
+  "CreationDate": 0,
+  "Operation": "string",
+  "ExpirationDate": 0,
+  "OperationType": 0,
+  "AccessType": "string",
+  "ConfirmationsLeft": 0,
+  "AccessFrom": 0,
+  "AccessTo": 0,
+  "Status": 0,
+  "StatusTitle": "string",
+  "InvalidRequestReason": 0,
+  "CurrentConfirmationLevel": 0,
+  "RequiredConfirmersCountLevel2": 0,
+  "TicketingSystemProperties": {
+    "Name": "string",
+    "Number": "string",
+    "Status": "string"
+  },
+  "AdditionalInfo": {},
+  "AccountDetails": {
+    "AccountID": "string",
+    "Properties": {}
+  },
+  "Confirmers": [
+    {
+      "Type": 0,
+      "ID": 0,
+      "Name": "string",
+      "Action": 0,
+      "Reason": "string",
+      "ActionDate": 0,
+      "AdditionalDetails": {},
+      "Members": [
+        {
+          "UserID": 0,
+          "UserName": "string",
+          "AdditionalDetails": {}
+        }
+      ]
+    }
+  ]
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+RequestID	
+(required)
+path	string
+requestID	
+query	string
+safeName	
+query	string
+requestorUserName	
+query	string
+requestorReason	
+query	string
+userReason	
+query	string
+creationDate	
+query	long
+operation	
+query	string
+expirationDate	
+query	long
+operationType	
+query	integer
+accessType	
+query	string
+confirmationsLeft	
+query	long
+accessFrom	
+query	long
+accessTo	
+query	long
+status	
+query	integer
+statusTitle	
+query	string
+invalidRequestReason	
+query	integer
+currentConfirmationLevel	
+query	integer
+requiredConfirmersCountLevel2	
+query	integer
+ticketingSystemProperties.name	
+query	string
+ticketingSystemProperties.number	
+query	string
+ticketingSystemProperties.status	
+query	string
+additionalInfo	
+query	undefined
+accountDetails.accountID	
+query	string
+accountDetails.properties	
+query	undefined
+confirmers	
+Provide multiple values in new lines.
+query	Array[]
+PlatformsShow/HideList OperationsExpand Operations
+get /api/Platforms
+Implementation Notes
+This method will return all existing account platforms.
+
+Response Class (Status 200)
+A list of all relevant platforms, for each platform the following should return:
+
+ModelExample Value
+[
+  {
+    "general": {
+      "id": "string",
+      "name": "string",
+      "systemType": "string",
+      "active": true,
+      "description": "string",
+      "platformBaseID": "string",
+      "platformType": "string"
+    },
+    "properties": {
+      "required": [
+        {
+          "name": "string",
+          "displayName": "string"
+        }
+      ],
+      "optional": [
+        {
+          "name": "string",
+          "displayName": "string"
+        }
+      ]
+    },
+    "linkedAccounts": [
+      {
+        "name": "string",
+        "displayName": "string"
+      }
+    ],
+    "credentialsManagement": {
+      "allowedSafes": "string",
+      "allowManualChange": true,
+      "performPeriodicChange": true,
+      "requirePasswordChangeEveryXDays": 0,
+      "allowManualVerification": true,
+      "performPeriodicVerification": true,
+      "requirePasswordVerificationEveryXDays": 0,
+      "allowManualReconciliation": true,
+      "automaticReconcileWhenUnsynched": true
+    },
+    "sessionManagement": {
+      "requirePrivilegedSessionMonitoringAndIsolation": true,
+      "recordAndSaveSessionActivity": true,
+      "PSMServerID": "string"
+    },
+    "privilegedAccessWorkflows": {
+      "requireDualControlPasswordAccessApproval": true,
+      "enforceCheckinCheckoutExclusiveAccess": true,
+      "enforceOnetimePasswordAccess": true
+    }
+  }
+]
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+active	
+query	boolean
+platformType	
+query	integer
+search	
+The search will be by Platform ID or Platform Name.
+
+query	string
+systemType	
+query	string
+get /api/Platforms/{id}
+Implementation Notes
+This method retrieves details of a specified platform from the Vault.
+
+Response Class (Status 200)
+The relevant platform information
+
+ModelExample Value
+{
+  "PlatformID": "string",
+  "Details": {},
+  "Active": true
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+id	
+(required)
+The unique ID of the platform.
+
+path	string
+post /api/Platforms/{PlatformID}/Export
+Implementation Notes
+This method enables you to export a platform to a zip file in order to import it to a different Vault environment. Note: This method returns a ZIP file that contains only the CPM Policy files and the PVWA Settings. If there are additional CPM plug-in files, they must be added manually by the user to the ZIP file before importing. This method can be used by members of the Vault Admin group.
+
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+PlatformID	
+(required)
+path	string
+Response Messages
+HTTP Status Code	Reason	Response Model	Headers
+200	
+Stream of the returned ZIP file that contains the CPM Policy file and PVWA Settings file.
+
+get /api/Platforms/{PlatformId}/Safes
+Implementation Notes
+This method gets platform's safes. This method can be used by members of the Vault Admin group.
+
+Response Class (Status 200)
+The relevant safes' names
+
+ModelExample Value
+[
+  "string"
+]
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+PlatformId	
+(required)
+path	string
+safe	
+query	string
+get /api/Platforms/Dependents
+Implementation Notes
+This method allows users to retrieve basic information of all existing dependent platforms.
+
+Response Class (Status 200)
+A list of all relevant dependent platforms.
+
+ModelExample Value
+[
+  {
+    "NumberOfLinkedTargetPlatforms": 0,
+    "CredentialsManagementPolicy": {
+      "Verification": {
+        "PerformAutomatic": true,
+        "RequirePasswordEveryXDays": 0,
+        "AutoOnAdd": true,
+        "IsRequirePasswordEveryXDaysAnException": true,
+        "AllowManual": true
+      },
+      "Change": {
+        "PerformAutomatic": true,
+        "RequirePasswordEveryXDays": 0,
+        "AutoOnAdd": true,
+        "IsRequirePasswordEveryXDaysAnException": true,
+        "AllowManual": true
+      },
+      "Reconcile": {
+        "AutomaticReconcileWhenUnsynced": true,
+        "AllowManual": true
+      },
+      "SecretUpdateConfiguration": {
+        "ChangePasswordInResetMode": true
+      }
+    },
+    "ID": 0,
+    "PlatformID": "string",
+    "Name": "string"
+  }
+]
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+search	
+query	string
+delete /api/Platforms/Dependents/{platformID}
+Implementation Notes
+This method allows Vault Admins to delete a dependent platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the dependent platform.
+
+path	long
+post /api/Platforms/Dependents/{platformID}/Duplicate
+Implementation Notes
+This method allows Vault Admins to duplicate a dependent platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the source dependent platform from which to duplicate
+
+path	long
+duplicatePlatformDetails	
+(required)
+
+Parameter content type: 
+application/json
+The details of the new platform.
+
+body	
+ModelExample Value
+{
+  "Name": "string",
+  "Description": "string"
+}
+post /api/Platforms/Dependents/{platformID}/Export
+Implementation Notes
+This method allows Vault Admins to export a dependent platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the dependent platform.
+
+path	long
+get /api/Platforms/Groups
+Implementation Notes
+This method allows users to retrieve basic information of all existing group platforms.
+
+Response Class (Status 200)
+A list of all relevant group platforms.
+
+ModelExample Value
+[
+  {
+    "Active": true,
+    "ID": 0,
+    "PlatformID": "string",
+    "Name": "string"
+  }
+]
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+search	
+query	string
+delete /api/Platforms/Groups/{platformID}
+Implementation Notes
+This method allows Vault Admins to delete a group platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the group platform.
+
+path	long
+post /api/Platforms/Groups/{platformID}/activate
+Implementation Notes
+This method allows Vault Admins to activate a group platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the group platform.
+
+path	long
+post /api/Platforms/Groups/{platformID}/deactivate
+Implementation Notes
+This method allows Vault Admins to deactivate a group platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the group platform.
+
+path	long
+post /api/Platforms/Groups/{platformID}/Duplicate
+Implementation Notes
+This method allows Vault Admins to duplicate a group platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the source group platform from which to duplicate
+
+path	long
+duplicatePlatformDetails	
+(required)
+
+Parameter content type: 
+application/json
+The details of the new platform.
+
+body	
+ModelExample Value
+{
+  "Name": "string",
+  "Description": "string"
+}
+post /api/Platforms/Groups/{platformID}/Export
+Implementation Notes
+This method allows Vault Admins to export a group platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the group platform.
+
+path	long
+post /api/Platforms/import
+Implementation Notes
+This method allows administrators to import a new platform.
+
+Response Class (Status 200)
+The unique ID of the platform.
+
+ModelExample Value
+{
+  "PlatformID": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+importPlatform	
+(required)
+
+Parameter content type: 
+application/json
+The ZIP file containing the platform and additional configuration parameters.
+
+body	
+ModelExample Value
+{
+  "ImportFile": "string"
+}
+get /api/Platforms/RotationalGroups
+Implementation Notes
+This method allows users to retrieve basic information of all existing rotational group platforms.
+
+Response Class (Status 200)
+A list of all relevant rotational group platforms.
+
+ModelExample Value
+[
+  {
+    "Active": true,
+    "GracePeriod": 0,
+    "ID": 0,
+    "PlatformID": "string",
+    "Name": "string"
+  }
+]
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+search	
+query	string
+delete /api/Platforms/RotationalGroups/{platformID}
+Implementation Notes
+This method allows Vault Admins to delete a rotational group platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the rotational group platform.
+
+path	long
+post /api/Platforms/RotationalGroups/{platformID}/activate
+Implementation Notes
+This method allows Vault Admins to activate a rotational group platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the rotational group platform.
+
+path	long
+post /api/Platforms/RotationalGroups/{platformID}/deactivate
+Implementation Notes
+This method allows Vault Admins to deactivate a rotational group platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the rotational group platform.
+
+path	long
+post /api/Platforms/RotationalGroups/{platformID}/Duplicate
+Implementation Notes
+This method allows Vault Admins to duplicate a rotational group platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the source rotational group platform from which to duplicate
+
+path	long
+duplicatePlatformDetails	
+(required)
+
+Parameter content type: 
+application/json
+The details of the new platform.
+
+body	
+ModelExample Value
+{
+  "Name": "string",
+  "Description": "string"
+}
+post /api/Platforms/RotationalGroups/{platformID}/Export
+Implementation Notes
+This method allows Vault Admins to export a rotational group platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the rotational group platform.
+
+path	long
+get /api/Platforms/Targets
+Implementation Notes
+This method allows users to retrieve basic information of all existing target platforms.
+
+Response Class (Status 200)
+A list of all relevant target platforms.
+
+ModelExample Value
+[
+  {
+    "Active": true,
+    "SystemType": "string",
+    "AllowedSafes": "string",
+    "PrivilegedAccessWorkflows": {
+      "RequireDualControlPasswordAccessApproval": {
+        "IsActive": true,
+        "IsAnException": true
+      },
+      "EnforceCheckinCheckoutExclusiveAccess": {
+        "IsActive": true,
+        "IsAnException": true
+      },
+      "EnforceOnetimePasswordAccess": {
+        "IsActive": true,
+        "IsAnException": true
+      },
+      "RequireUsersToSpecifyReasonForAccess": {
+        "IsActive": true,
+        "IsAnException": true
+      }
+    },
+    "CredentialsManagementPolicy": {
+      "Verification": {
+        "PerformAutomatic": true,
+        "RequirePasswordEveryXDays": 0,
+        "AutoOnAdd": true,
+        "IsRequirePasswordEveryXDaysAnException": true,
+        "AllowManual": true
+      },
+      "Change": {
+        "PerformAutomatic": true,
+        "RequirePasswordEveryXDays": 0,
+        "AutoOnAdd": true,
+        "IsRequirePasswordEveryXDaysAnException": true,
+        "AllowManual": true
+      },
+      "Reconcile": {
+        "AutomaticReconcileWhenUnsynced": true,
+        "AllowManual": true
+      },
+      "SecretUpdateConfiguration": {
+        "ChangePasswordInResetMode": true
+      }
+    },
+    "PrivilegedSessionManagement": {
+      "PSMServerId": "string",
+      "PSMServerName": "string"
+    },
+    "ID": 0,
+    "PlatformID": "string",
+    "Name": "string"
+  }
+]
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+filter	
+query	string
+search	
+query	string
+delete /api/Platforms/Targets/{platformID}
+Implementation Notes
+This method allows Vault Admins to delete a target platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the target platform.
+
+path	long
+post /api/Platforms/Targets/{platformID}/activate
+Implementation Notes
+This method allows Vault Admins to activate a target platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the target platform.
+
+path	long
+post /api/Platforms/Targets/{platformID}/deactivate
+Implementation Notes
+This method allows Vault Admins to deactivate a target platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the target platform.
+
+path	long
+post /api/Platforms/Targets/{platformID}/Duplicate
+Implementation Notes
+This method allows Vault Admins to duplicate a target platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the source target platform from which to duplicate
+
+path	long
+duplicatePlatformDetails	
+(required)
+
+Parameter content type: 
+application/json
+The details of the new platform.
+
+body	
+ModelExample Value
+{
+  "Name": "string",
+  "Description": "string"
+}
+post /api/Platforms/Targets/{platformID}/Export
+Implementation Notes
+This method allows Vault Admins to export a target platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the target platform.
+
+path	long
+get /api/Platforms/Targets/{platformID}/PrivilegedSessionManagement
+Implementation Notes
+This method allows Vault Admins to retrieve the PSM Policy Section of a target platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+The target platform PSM Policy details.
+
+ModelExample Value
+{
+  "PSMConnectors": [
+    {
+      "PSMConnectorID": "string",
+      "Enabled": true
+    }
+  ],
+  "PSMServerId": "string",
+  "PSMServerName": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the target platform.
+
+path	long
+put /api/Platforms/Targets/{platformID}/PrivilegedSessionManagement
+Implementation Notes
+This method allows Vault Admins to update the PSM policy section of a target platform. To run this web service, the user must be a member of the Vault Admins group.
+
+Response Class (Status 200)
+Update target platform PSM Policy details.
+
+ModelExample Value
+{
+  "PSMConnectors": [
+    {
+      "PSMConnectorID": "string",
+      "Enabled": true
+    }
+  ],
+  "PSMServerId": "string",
+  "PSMServerName": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+platformID	
+(required)
+Unique ID of the target platform.
+
+path	long
+privilegedSessionManagement	
+(required)
+
+Parameter content type: 
+application/json
+Unique ID of the psm server and list of connectors
+
+body	
+ModelExample Value
+{
+  "PSMConnectors": [
+    {
+      "PSMConnectorID": "string",
+      "Enabled": true
+    }
+  ],
+  "PSMServerId": "string",
+  "PSMServerName": "string"
+}
+get /api/Platforms/Targets/SystemTypes
+Implementation Notes
+This method allows users to retrieve all basic information on all existing system types.
+
+Response Class (Status 200)
+A list of all relevant system type
+
+ModelExample Value
+[
+  {
+    "PlatformsCount": 0,
+    "Name": "string"
+  }
+]
+
+
+Response Content Type 
+application/json
+PSM ConnectorsShow/HideList OperationsExpand Operations
+get /api/PSM/Connectors
+Implementation Notes
+This method allows vault admins to get a list of all connectors of an entire environment
+
+Response Class (Status 200)
+A list of all relevant PSM connectors.
+
+ModelExample Value
+[
+  {
+    "ID": "string",
+    "DisplayName": "string"
+  }
+]
+
+
+Response Content Type 
+application/json
+PSM ServersShow/HideList OperationsExpand Operations
+get /api/PSM/Servers
+Implementation Notes
+This method allows vault admins to get a list of all PSM servers defined for the environment
+
+Response Class (Status 200)
+A list of all relevant PSM servers.
+
+ModelExample Value
+[
+  {
+    "ID": "string",
+    "Name": "string",
+    "Address": "string"
+  }
+]
+
+
+Response Content Type 
+application/json
+RecordingsShow/HideList OperationsExpand Operations
+get /api/Recordings
+Implementation Notes
+This method returns the details of recordings of PSM, PSMP or OPM sessions.
+
+Response Class (Status 200)
+List of the relevant recordings
+
+ModelExample Value
+{
+  "SessionID": "string",
+  "SessionGuid": "00000000-0000-0000-0000-000000000000",
+  "SafeName": "string",
+  "FolderName": "string",
+  "IsLive": true,
+  "FileName": "string",
+  "Start": 0,
+  "End": 0,
+  "Duration": 0,
+  "User": "string",
+  "RemoteMachine": "string",
+  "ProtectionDate": 0,
+  "ProtectedBy": "string",
+  "ProtectionEnabled": true,
+  "AccountUsername": "string",
+  "AccountPlatformID": "string",
+  "AccountAddress": "string",
+  "PIMSuCommand": "string",
+  "PIMSuCWD": "string",
+  "ConnectionComponentID": "string",
+  "PSMRecordingEntity": "string",
+  "TicketID": "string",
+  "FromIP": "string",
+  "Protocol": "string",
+  "Client": "string",
+  "RiskScore": 0,
+  "Severity": "string",
+  "IncidentDetails": {
+    "Incident": {
+      "Id": "string",
+      "Url": "string",
+      "Score": 0,
+      "Name": "string",
+      "StartDate": 0
+    },
+    "Sessions": [
+      {
+        "Id": "string",
+        "Score": 0,
+        "Severity": "string",
+        "Commands": [
+          {
+            "Encoded": true,
+            "Value": "string",
+            "Offset": "string",
+            "Score": 0,
+            "Severity": "string"
+          }
+        ]
+      }
+    ]
+  },
+  "RawProperties": {},
+  "RecordingFiles": [
+    {
+      "FileName": "string",
+      "RecordingType": 0,
+      "LastReviewBy": "string",
+      "LastReviewDate": 0,
+      "FileSize": 0,
+      "CompressedFileSize": 0,
+      "Format": "string"
+    }
+  ],
+  "RecordedActivities": [
+    {
+      "ActivityText": "string",
+      "ActivityType": 0,
+      "ActivityId": "string",
+      "Formats": [
+        "string"
+      ],
+      "Offsets": {}
+    }
+  ],
+  "VideoSize": 0,
+  "TextSize": 0,
+  "DetailsUrl": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+returnURL	
+The returned URL.
+
+query	string
+limit	
+Determines the number of recordings that are returned in the list. The maximum value is defined in the MaxRecords property in Options -> Privileged Session Management -> General Setting -> Search Properties.
+
+query	long
+offset	
+Determines which recording results will be returned, according to a specific place in the returned list. This value defines the recording's place in the list and how many results will be skipped.
+
+query	long
+useCache	
+query	boolean
+sort	
+Provide multiple values in new lines.
+The sort can be done by each property on the recording file: RiskScore, FileName, SafeName, FolderName, PSMVaultUserName, FromIP, RemoteMachine, Client, Protocol, AccountUserName, AccountAddress, AccountPlatformID, PSMStartTime, TicketID. The sort can be in ascending or descending order. To sort in descending order, specify ' - ' (dash) before the recording property by which to sort.
+
+query	Array[string]
+search	
+Returns recordings that are filtered by properties that contain the specified search text.
+
+query	string
+activities	
+Returns recordings with specific activities.
+
+query	string
+fromTime	
+Returns recordings from a specific date.
+
+query	long
+toTime	
+Returns recordings before a specific date.
+
+query	long
+safe	
+Returns recordings from a specific Safe.
+
+query	string
+get /api/Recordings/{recordingId}
+Implementation Notes
+This method returns details of a recorded session.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+recordingId	
+(required)
+The unique ID of the PSM Recorded Session.
+
+path	string
+returnURL	
+query	string
+get /api/Recordings/{recordingId}/activities
+Implementation Notes
+This method returns activities of a recorded session.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+recordingId	
+(required)
+The unique ID of the PSM Recorded Session.
+
+path	string
+post /api/Recordings/{recordingId}/Play
+Implementation Notes
+This method returns data stream of a recorded session.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+recordingId	
+(required)
+The unique ID of the PSM Recorded Session.
+
+path	string
+get /api/Recordings/{recordingId}/properties
+Implementation Notes
+This method returns properties of a recorded session.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+recordingId	
+(required)
+The unique ID of the PSM Recorded Session.
+
+path	string
+returnURL	
+query	string
+get /api/Recordings/{recordingId}/valid
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+recordingId	
+(required)
+path	string
+SafesShow/HideList OperationsExpand Operations
+get /api/Safes
+Implementation Notes
+This method returns a list of all Safes in the Vault that the user has permissions for. The user who runs this web service must be a member of the Safes in the Vault that are returned in the list.
+
+Response Class (Status 200)
+The list of Safes
+
+ModelExample Value
+[
+  {
+    "safeNumber": 0,
+    "location": "string",
+    "creator": {
+      "id": "string",
+      "name": "string"
+    },
+    "accounts": [
+      {
+        "id": "string",
+        "name": "string"
+      }
+    ],
+    "olacEnabled": true,
+    "numberOfVersionsRetention": 0,
+    "numberOfDaysRetention": 0,
+    "autoPurgeEnabled": true,
+    "creationTime": 0,
+    "lastModificationTime": 0,
+    "safeUrlId": "string",
+    "safeName": "string",
+    "description": "string",
+    "managingCPM": "string",
+    "isExpiredMember": true
+  }
+]
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+limit	
+The maximum number of Safes that are returned.
+
+query	long
+offset	
+Offset of the first Safe that is returned in the collection of results.
+
+query	long
+useCache	
+Whether or not to retrieve the cache from a session.
+
+query	boolean
+sort	
+Provide multiple values in new lines.
+Sorts according to the safeName property in ascending order (default) or descending order to control the sort direction.
+
+query	Array[string]
+search	
+Searches according to the Safe name. Search is performed according to the REST standard (search="search word").
+
+query	string
+includeAccounts	
+Whether or not to return accounts for each Safe as part of the response. If not sent, the value will be false.
+
+query	boolean
+extendedDetails	
+Whether or not to return all Safe details or only safeName as part of the response. If not sent, the value is True.
+
+query	boolean
+post /api/Safes
+Implementation Notes
+This method adds a new Safe to the Vault. The user who runs this web service must have Add Safes permission in the Vault.
+
+Response Class (Status 201)
+The added Safe
+
+ModelExample Value
+{
+  "safeUrlId": "string",
+  "safeName": "string",
+  "safeNumber": 0,
+  "description": "string",
+  "location": "string",
+  "creator": {
+    "id": "string",
+    "name": "string"
+  },
+  "olacEnabled": true,
+  "managingCPM": "string",
+  "numberOfVersionsRetention": 0,
+  "numberOfDaysRetention": 0,
+  "autoPurgeEnabled": true,
+  "creationTime": 0,
+  "lastModificationTime": 0
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+addSafeRequest	
+(required)
+
+Parameter content type: 
+application/json
+The new safe request
+
+body	
+ModelExample Value
+{
+  "SafeName": "string",
+  "Description": "string",
+  "Location": "string",
+  "NumberOfDaysRetention": 0,
+  "NumberOfVersionsRetention": 0,
+  "OLACEnabled": true,
+  "ManagingCPM": "string"
+}
+delete /api/Safes/{safeUrlId}
+Implementation Notes
+This method deletes a safe from the Vault. The user who runs this web service must have Manage Safe permissions on the required Safe.
+
+Response Class (Status 204)
+The safe was deleted.
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+safeUrlId	
+(required)
+The unique ID of the Safe
+
+path	string
+get /api/Safes/{safeUrlId}
+Implementation Notes
+This method returns information about a specific Safe in the Vault. The user who runs this web service must be a member of the Safe in the Vault that is returned.
+
+Response Class (Status 200)
+Get Safe Details
+
+ModelExample Value
+{
+  "safeUrlId": "string",
+  "safeName": "string",
+  "safeNumber": 0,
+  "description": "string",
+  "location": "string",
+  "creator": {
+    "id": "string",
+    "name": "string"
+  },
+  "olacEnabled": true,
+  "managingCPM": "string",
+  "numberOfVersionsRetention": 0,
+  "numberOfDaysRetention": 0,
+  "autoPurgeEnabled": true,
+  "creationTime": 0,
+  "lastModificationTime": 0,
+  "accounts": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "isExpiredMember": true
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+safeUrlId	
+(required)
+The name of the Safe.
+
+path	string
+includeAccounts	
+Whether or not to return accounts for each Safe as part of the response. If not sent, the value will be False.
+
+query	boolean
+useCache	
+Whether to retrieve from session or not.
+
+query	boolean
+put /api/Safes/{safeUrlId}
+Implementation Notes
+This method updates a single Safe in the Vault. The user who runs this web service must have Manage Safe permissions and View Safe Members permissions on the Safe.
+
+Response Class (Status 200)
+The Updated Safe
+
+ModelExample Value
+{
+  "safeUrlId": "string",
+  "safeName": "string",
+  "safeNumber": 0,
+  "description": "string",
+  "location": "string",
+  "creator": {
+    "id": "string",
+    "name": "string"
+  },
+  "olacEnabled": true,
+  "managingCPM": "string",
+  "numberOfVersionsRetention": 0,
+  "numberOfDaysRetention": 0,
+  "autoPurgeEnabled": true,
+  "creationTime": 0,
+  "lastModificationTime": 0
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+updateSafeRequestBody	
+(required)
+
+Parameter content type: 
+application/json
+Updated safe request
+
+body	
+ModelExample Value
+{
+  "SafeName": "string",
+  "Description": "string",
+  "Location": "string",
+  "NumberOfDaysRetention": 0,
+  "NumberOfVersionsRetention": 0,
+  "OLACEnabled": true,
+  "ManagingCPM": "string"
+}
+safeUrlId	
+(required)
+The unique ID of the Safe
+
+path	string
+get /api/Safes/{safeUrlId}/members
+Implementation Notes
+This method returns the list of members of a Safe. The user who run this web service must have View Safe Members permissions on the Safe.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "safeUrlId": "string",
+  "safeName": "string",
+  "safeNumber": 0,
+  "memberId": 0,
+  "memberName": "string",
+  "memberType": "string",
+  "membershipExpirationDate": 0,
+  "isExpiredMembershipEnable": true,
+  "isPredefinedUser": true,
+  "isReadOnly": true,
+  "permissions": {}
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+safeUrlId	
+(required)
+The unique ID of the Safe.
+
+path	string
+limit	
+The maximum number of members that are returned. When used together with the offset parameter, this value determines the number of Safes to return, starting from the first Safe that is returned.
+
+query	long
+offset	
+Offset of the first member that is returned in the collection of results.
+
+query	long
+useCache	
+The name of the Safe used when calling Safe APIs.
+
+query	boolean
+sort	
+Provide multiple values in new lines.
+Sorts according to the memberName property in ascending order (default) or descending order to control the sort direction. asc: ascending desc:descending
+
+query	Array[string]
+search	
+Searches according to the Safe name. Search is performed according to the REST standard (search="search word").
+
+query	string
+filter	
+Filters are according to the REST standard. Search for Safe members using the following filters. Multiple filters can be applied using the AND operator. • memberType - returns all members according to the type(user or group) Default: both Example: filter= memberType eq user • membershipExpired - returns either expired members or members that are not expired. Default: both Example: filter= membershipExpired eq true • includePredefinedUsers - includes predefined users in the returned list. Default: False, non-predefined users only Example: filter= includePredefinedUsers eq true
+
+query	string
+post /api/Safes/{safeUrlId}/members
+Implementation Notes
+This method adds an existing user as a Safe member. The user who runs this web service must have Manage Safe Members permissions in the Vault.
+
+Response Class (Status 201)
+The added member
+
+ModelExample Value
+{
+  "safeUrlId": "string",
+  "safeName": "string",
+  "safeNumber": 0,
+  "memberId": 0,
+  "memberName": "string",
+  "memberType": "string",
+  "membershipExpirationDate": 0,
+  "isExpiredMembershipEnable": true,
+  "isPredefinedUser": true,
+  "isReadOnly": true,
+  "permissions": {}
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+addSafeMemberRequestBody	
+(required)
+
+Parameter content type: 
+application/json
+The new safe member.
+
+body	
+ModelExample Value
+{
+  "MemberName": "MemberName",
+  "SearchIn": "Vault",
+  "MembershipExpirationDate": 1745674938,
+  "Permissions": {
+    "useAccounts": false,
+    "retrieveAccounts": false,
+    "listAccounts": false,
+    "addAccounts": false,
+    "updateAccountContent": false,
+    "updateAccountProperties": false,
+    "initiateCPMAccountManagementOperations": false,
+    "specifyNextAccountContent": false,
+    "renameAccounts": false,
+    "deleteAccounts": false,
+    "unlockAccounts": false,
+    "manageSafe": false,
+    "manageSafeMembers": false,
+    "backupSafe": false,
+    "viewAuditLog": false,
+    "viewSafeMembers": false,
+    "accessWithoutConfirmation": false,
+    "createFolders": false,
+    "deleteFolders": false,
+    "moveAccountsAndFolders": false,
+    "requestsAuthorizationLevel1": false,
+    "requestsAuthorizationLevel2": false
+  },
+  "MemberType": "Group"
+}
+safeUrlId	
+(required)
+The unique ID of the Safe.
+
+path	string
+delete /api/Safes/{safeUrlId}/members/{memberName}
+Implementation Notes
+This method removes a specific member from a Safe. The user who runs this web service must have Manage Safe Members permissions in the Vault.
+
+Response Class (Status 204)
+The Safe member was deleted.
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+safeUrlId	
+(required)
+The name of the Safe from which to delete the member.
+
+path	string
+memberName	
+(required)
+The name of the Safe member to delete from the list of Safe members.
+
+path	string
+get /api/Safes/{safeUrlId}/members/{memberName}
+Implementation Notes
+This method returns a member of a Safe. To run this web service, the user must have View Safe Members permission for the Safe.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "safeUrlId": "string",
+  "safeName": "string",
+  "safeNumber": 0,
+  "memberId": 0,
+  "memberName": "string",
+  "memberType": "string",
+  "membershipExpirationDate": 0,
+  "isExpiredMembershipEnable": true,
+  "isPredefinedUser": true,
+  "isReadOnly": true,
+  "permissions": {}
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+safeUrlId	
+(required)
+The name of the Safe used when calling Safe APIs.
+
+path	string
+memberName	
+(required)
+The Vault user name, Domain user name or group name of the Safe member.
+
+path	string
+useCache	
+Whether to retrieve from session or not.
+
+query	boolean
+put /api/Safes/{safeUrlId}/members/{memberName}
+Implementation Notes
+This method updates an existing safe member. The user who runs this web service must have Manage Safe permissions and View Safe Members permissions on the Safe.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "safeUrlId": "string",
+  "safeName": "string",
+  "safeNumber": 0,
+  "memberId": 0,
+  "memberName": "string",
+  "memberType": "string",
+  "membershipExpirationDate": 0,
+  "isExpiredMembershipEnable": true,
+  "isPredefinedUser": true,
+  "isReadOnly": true,
+  "permissions": {}
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+updateSafeMemberRequestBody	
+(required)
+
+Parameter content type: 
+application/json
+The updated safe member.
+
+body	
+ModelExample Value
+{
+  "MembershipExpirationDate": 0,
+  "Permissions": {}
+}
+safeUrlId	
+(required)
+The name of the Safe used when calling Safe APIs.
+
+path	string
+memberName	
+(required)
+The Vault user name, Domain user name or group name of the Safe member.
+
+path	string
+User GroupsShow/HideList OperationsExpand Operations
+get /api/UserGroups
+Implementation Notes
+This method returns a list of all existing user groups in the Vault. The user who runs this web service must have Audit users permissions in the Vault. Groups on the same level as your user or lower in the the Vault hierarchy are retrieved.
+
+The groups that are returned depends on how the HideVaultUsersTree parameter is defined in the dpbaram.ini file.
+If HideVaultUsersTree is set to No, all groups are returned(instead of only those on the same level or lower in the Vault hierarchy).
+If HideVaultUsersTree is set to Yes, only auditors and managers are allowed to get all groups.
+Retrieving more than 1,000 groups may cause a slowdown in the response.
+Response Class (Status 200)
+The list of requested groups
+
+ModelExample Value
+{
+  "value": [
+    {
+      "id": 0,
+      "groupType": "Vault",
+      "directory": "string",
+      "dn": "string",
+      "members": [
+        {
+          "username": "string",
+          "id": 0
+        }
+      ],
+      "groupName": "string",
+      "description": "string",
+      "location": "string"
+    }
+  ],
+  "count": 0,
+  "nextLink": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+search	
+Searches according to the REST standard (searching with "contains"). Search matches when all search terms appear in the group name.
+
+query	string
+sort	
+Provide multiple values in new lines.
+Property or properties by which to sort returned users, followed by asc (default) or desc to control sort direction.
+Separate multiple properties with commas, up to a maximum of three properties: "groupname", "directory", "location"
+
+query	Array[string]
+filter	
+Filters according to the REST standard. Search for groups using the following filters:
+
+- groupType eq
+< Directory|Vault >
+- groupName eq
+< Group_Name >
+
+query	string
+includeMembers	
+Whether or not to return members for each user group as part of the response. If not sent, the value will be False.
+
+query	boolean
+post /api/UserGroups
+Implementation Notes
+This method adds a new user group to the Vault. To run this web service, the user must have the Add/Update Users Group authorization in the Vault.
+
+Response Class (Status 200)
+The created group
+
+ModelExample Value
+{
+  "id": 0,
+  "groupType": "Vault",
+  "directory": "string",
+  "dn": "string",
+  "members": [
+    {
+      "username": "string",
+      "id": 0
+    }
+  ],
+  "groupName": "string",
+  "description": "string",
+  "location": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userGroup	
+(required)
+
+Parameter content type: 
+application/json
+The new user group details
+
+body	
+ModelExample Value
+{
+  "groupName": "string",
+  "description": "string",
+  "location": "string"
+}
+delete /api/UserGroups/{groupId}
+Implementation Notes
+This method deletes a Vault group. To run this web service, the user must have the following permissions: Add\Update Users
+
+Response Class (Status 204)
+The user group was deleted.
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+groupId	
+(required)
+The unique ID of the group.
+
+path	long
+put /api/UserGroups/{groupId}
+Implementation Notes
+This method updates a Vault group. The user who runs this web service must have Add\Update Users permissions in the Vault.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "id": 0,
+  "groupType": "Vault",
+  "directory": "string",
+  "dn": "string",
+  "members": [
+    {
+      "username": "string",
+      "id": 0
+    }
+  ],
+  "groupName": "string",
+  "description": "string",
+  "location": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+groupId	
+(required)
+The unique ID of the group.
+
+path	long
+group	
+(required)
+
+Parameter content type: 
+application/json
+The updated User Group
+
+body	
+ModelExample Value
+{
+  "groupName": "string",
+  "description": "string",
+  "location": "string"
+}
+get /api/UserGroups/{groupID}
+Implementation Notes
+This method returns information about a specific user group.
+
+To run this web service, the user must have the Audit users permissions in the Vault.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "id": 0,
+  "groupType": "Vault",
+  "directory": "string",
+  "dn": "string",
+  "members": [
+    {
+      "username": "string",
+      "id": 0
+    }
+  ],
+  "groupName": "string",
+  "description": "string",
+  "location": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+groupID	
+(required)
+The ID of the User Group for which information is returned.
+
+path	string
+post /api/UserGroups/{groupId}/Members
+Implementation Notes
+This method adds a member (that can be regular Vault user, LDAP mapped group or LDAP user) to an existing Vault group. Every user that has the following Vault authorization can run this web service: "Add/Update users".
+
+Response Class (Status 201)
+Created
+
+ModelExample Value
+{
+  "memberId": "string",
+  "memberType": "Vault",
+  "domainName": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+groupId	
+(required)
+The unique ID of the Vault group.
+
+path	long
+memberToAdd	
+(required)
+
+Parameter content type: 
+application/json
+The parameters for the member to be added
+
+body	
+ModelExample Value
+{
+  "memberId": "string",
+  "memberType": "Vault",
+  "domainName": "string"
+}
+delete /api/UserGroups/{groupId}/Members/{memberName}
+Implementation Notes
+This method removes a user/group from the members of a user group. To run this web service, the user must have permission to "Add/Update users" (Vault Authorization).
+
+Response Class (Status 204)
+The user was removed from group
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+groupId	
+(required)
+The unique ID of the group.
+
+path	long
+memberName	
+(required)
+The name of the user/group to remove from the group members
+
+path	string
+UsersShow/HideList OperationsExpand Operations
+get /api/Users
+Implementation Notes
+This method returns a list of all existing users in the Vault except for the Master and Batch built-in users.
+
+The user who runs this web service must have Audit Users permissions in the Vault.
+
+Groups on the same level as your user or lower in the the Vault hierarchy are retrieved.
+
+The groups that are returned depends on the HideVaultUsersTree parameter is defined in the dpbaram.ini file.
+If HideVaultUsersTree is set to No, all groups are returned(instead of only those on the same level or lower in the Vault hierarchy).
+If HideVaultUsersTree is set to Yes, only auditors and managers are allowed to get all groups.
+Note: This Web service returns up to 6000 users in up to 20 seconds. If the number of users is higher, the response time may be higher.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+[
+  {
+    "id": 0,
+    "username": "string",
+    "source": "string",
+    "userType": "string",
+    "componentUser": true,
+    "groupsMembership": [
+      {
+        "groupID": 0,
+        "groupName": "string",
+        "groupType": "Vault"
+      }
+    ],
+    "userDN": "string",
+    "vaultAuthorization": [
+      "string"
+    ],
+    "location": "string",
+    "personalDetails": {
+      "firstName": "string",
+      "middleName": "string",
+      "lastName": "string",
+      "organization": "string",
+      "department": "string"
+    },
+    "enableUser": true,
+    "suspended": true
+  }
+]
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+ExtendedDetails	
+Returns additional user details such as user groups and userDN for LDAP users.
+
+query	boolean
+search	
+Search is according to REST standards using the values, username, firstname, and lastname.
+
+query	string
+sort	
+Provide multiple values in new lines.
+Property or properties by which to sort returned users, followed by asc (default) or desc to control sort direction. Separate multiple properties with commas, up to a maximum of three properties. (*include the properties)
+
+query	Array[string]
+userName	
+The name of the user.
+
+query	string
+userType	
+The user type as defined in the license.
+
+query	string
+componentUser	
+If the user is a component, then the value is true. Otherwise, it is false.
+
+query	boolean
+post /api/Users
+Implementation Notes
+This method adds a new user to the Vault. The user who runs this web service must have Add/Update Users permissions in the Vault.
+
+To run this web service, the user must have the Add/Update Users authorization in the Vault.
+
+Response Class (Status 201)
+Created
+
+ModelExample Value
+{
+  "enableUser": true,
+  "changePassOnNextLogon": true,
+  "expiryDate": 0,
+  "suspended": true,
+  "lastSuccessfulLoginDate": 0,
+  "unAuthorizedInterfaces": [
+    "string"
+  ],
+  "authenticationMethod": [
+    "AuthTypePass"
+  ],
+  "passwordNeverExpires": true,
+  "distinguishedName": "string",
+  "description": "string",
+  "businessAddress": {
+    "workStreet": "string",
+    "workCity": "string",
+    "workState": "string",
+    "workZip": "string",
+    "workCountry": "string"
+  },
+  "internet": {
+    "homePage": "string",
+    "homeEmail": "string",
+    "businessEmail": "string",
+    "otherEmail": "string"
+  },
+  "phones": {
+    "homeNumber": "string",
+    "businessNumber": "string",
+    "cellularNumber": "string",
+    "faxNumber": "string",
+    "pagerNumber": "string"
+  },
+  "personalDetails": {
+    "street": "string",
+    "city": "string",
+    "state": "string",
+    "zip": "string",
+    "country": "string",
+    "title": "string",
+    "organization": "string",
+    "department": "string",
+    "profession": "string",
+    "firstName": "string",
+    "middleName": "string",
+    "lastName": "string"
+  },
+  "initialPassword": "string",
+  "id": 0,
+  "username": "string",
+  "source": "string",
+  "userType": "string",
+  "componentUser": true,
+  "groupsMembership": [
+    {
+      "groupID": 0,
+      "groupName": "string",
+      "groupType": "Vault"
+    }
+  ],
+  "userDN": "string",
+  "vaultAuthorization": [
+    "string"
+  ],
+  "location": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+user	
+(required)
+
+Parameter content type: 
+application/json
+The new user
+
+body	
+ModelExample Value
+{
+  "enableUser": true,
+  "changePassOnNextLogon": true,
+  "expiryDate": 0,
+  "suspended": true,
+  "lastSuccessfulLoginDate": 0,
+  "unAuthorizedInterfaces": [
+    "string"
+  ],
+  "authenticationMethod": [
+    "AuthTypePass"
+  ],
+  "passwordNeverExpires": true,
+  "distinguishedName": "string",
+  "description": "string",
+  "businessAddress": {
+    "workStreet": "string",
+    "workCity": "string",
+    "workState": "string",
+    "workZip": "string",
+    "workCountry": "string"
+  },
+  "internet": {
+    "homePage": "string",
+    "homeEmail": "string",
+    "businessEmail": "string",
+    "otherEmail": "string"
+  },
+  "phones": {
+    "homeNumber": "string",
+    "businessNumber": "string",
+    "cellularNumber": "string",
+    "faxNumber": "string",
+    "pagerNumber": "string"
+  },
+  "personalDetails": {
+    "street": "string",
+    "city": "string",
+    "state": "string",
+    "zip": "string",
+    "country": "string",
+    "title": "string",
+    "organization": "string",
+    "department": "string",
+    "profession": "string",
+    "firstName": "string",
+    "middleName": "string",
+    "lastName": "string"
+  },
+  "initialPassword": "string",
+  "id": 0,
+  "username": "string",
+  "source": "string",
+  "userType": "string",
+  "componentUser": true,
+  "groupsMembership": [
+    {
+      "groupID": 0,
+      "groupName": "string",
+      "groupType": "Vault"
+    }
+  ],
+  "userDN": "string",
+  "vaultAuthorization": [
+    "string"
+  ],
+  "location": "string"
+}
+delete /api/Users/{userID}
+Implementation Notes
+This method deletes a specific user in the Vault.
+
+The user who runs this web service must have Add/Update Users permissions in the Vault.
+
+Response Class (Status 204)
+The user was deleted.
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the user.
+
+path	string
+get /api/Users/{userID}
+Implementation Notes
+This method returns information about a specific User in the Vault.
+
+To run this web service, the user must have the Audit users permissions in the Vault.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "enableUser": true,
+  "changePassOnNextLogon": true,
+  "expiryDate": 0,
+  "suspended": true,
+  "lastSuccessfulLoginDate": 0,
+  "unAuthorizedInterfaces": [
+    "string"
+  ],
+  "authenticationMethod": [
+    "AuthTypePass"
+  ],
+  "passwordNeverExpires": true,
+  "distinguishedName": "string",
+  "description": "string",
+  "businessAddress": {
+    "workStreet": "string",
+    "workCity": "string",
+    "workState": "string",
+    "workZip": "string",
+    "workCountry": "string"
+  },
+  "internet": {
+    "homePage": "string",
+    "homeEmail": "string",
+    "businessEmail": "string",
+    "otherEmail": "string"
+  },
+  "phones": {
+    "homeNumber": "string",
+    "businessNumber": "string",
+    "cellularNumber": "string",
+    "faxNumber": "string",
+    "pagerNumber": "string"
+  },
+  "personalDetails": {
+    "street": "string",
+    "city": "string",
+    "state": "string",
+    "zip": "string",
+    "country": "string",
+    "title": "string",
+    "organization": "string",
+    "department": "string",
+    "profession": "string",
+    "firstName": "string",
+    "middleName": "string",
+    "lastName": "string"
+  },
+  "initialPassword": "string",
+  "id": 0,
+  "username": "string",
+  "source": "string",
+  "userType": "string",
+  "componentUser": true,
+  "groupsMembership": [
+    {
+      "groupID": 0,
+      "groupName": "string",
+      "groupType": "Vault"
+    }
+  ],
+  "userDN": "string",
+  "vaultAuthorization": [
+    "string"
+  ],
+  "location": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the User for which information is returned.
+
+path	string
+put /api/Users/{userID}
+Implementation Notes
+This method edit an existing user. To run this web service, the user must have the Add/Update Users authorization in the Vault. In order to Edit "changePasswordOnTheNextLogon" the user must have the Reset Password authorization in the Vault.
+
+Response Class (Status 200)
+Updated User
+
+ModelExample Value
+{
+  "enableUser": true,
+  "changePassOnNextLogon": true,
+  "expiryDate": 0,
+  "suspended": true,
+  "lastSuccessfulLoginDate": 0,
+  "unAuthorizedInterfaces": [
+    "string"
+  ],
+  "authenticationMethod": [
+    "AuthTypePass"
+  ],
+  "passwordNeverExpires": true,
+  "distinguishedName": "string",
+  "description": "string",
+  "businessAddress": {
+    "workStreet": "string",
+    "workCity": "string",
+    "workState": "string",
+    "workZip": "string",
+    "workCountry": "string"
+  },
+  "internet": {
+    "homePage": "string",
+    "homeEmail": "string",
+    "businessEmail": "string",
+    "otherEmail": "string"
+  },
+  "phones": {
+    "homeNumber": "string",
+    "businessNumber": "string",
+    "cellularNumber": "string",
+    "faxNumber": "string",
+    "pagerNumber": "string"
+  },
+  "personalDetails": {
+    "street": "string",
+    "city": "string",
+    "state": "string",
+    "zip": "string",
+    "country": "string",
+    "title": "string",
+    "organization": "string",
+    "department": "string",
+    "profession": "string",
+    "firstName": "string",
+    "middleName": "string",
+    "lastName": "string"
+  },
+  "initialPassword": "string",
+  "id": 0,
+  "username": "string",
+  "source": "string",
+  "userType": "string",
+  "componentUser": true,
+  "groupsMembership": [
+    {
+      "groupID": 0,
+      "groupName": "string",
+      "groupType": "Vault"
+    }
+  ],
+  "userDN": "string",
+  "vaultAuthorization": [
+    "string"
+  ],
+  "location": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the user to update.
+
+path	string
+user	
+(required)
+
+Parameter content type: 
+application/json
+The existing user
+
+body	
+ModelExample Value
+{
+  "enableUser": true,
+  "changePassOnNextLogon": true,
+  "expiryDate": 0,
+  "suspended": true,
+  "lastSuccessfulLoginDate": 0,
+  "unAuthorizedInterfaces": [
+    "string"
+  ],
+  "authenticationMethod": [
+    "AuthTypePass"
+  ],
+  "passwordNeverExpires": true,
+  "distinguishedName": "string",
+  "description": "string",
+  "businessAddress": {
+    "workStreet": "string",
+    "workCity": "string",
+    "workState": "string",
+    "workZip": "string",
+    "workCountry": "string"
+  },
+  "internet": {
+    "homePage": "string",
+    "homeEmail": "string",
+    "businessEmail": "string",
+    "otherEmail": "string"
+  },
+  "phones": {
+    "homeNumber": "string",
+    "businessNumber": "string",
+    "cellularNumber": "string",
+    "faxNumber": "string",
+    "pagerNumber": "string"
+  },
+  "personalDetails": {
+    "street": "string",
+    "city": "string",
+    "state": "string",
+    "zip": "string",
+    "country": "string",
+    "title": "string",
+    "organization": "string",
+    "department": "string",
+    "profession": "string",
+    "firstName": "string",
+    "middleName": "string",
+    "lastName": "string"
+  },
+  "initialPassword": "string",
+  "id": 0,
+  "username": "string",
+  "source": "string",
+  "userType": "string",
+  "componentUser": true,
+  "groupsMembership": [
+    {
+      "groupID": 0,
+      "groupName": "string",
+      "groupType": "Vault"
+    }
+  ],
+  "userDN": "string",
+  "vaultAuthorization": [
+    "string"
+  ],
+  "location": "string"
+}
+post /api/Users/{userID}/Activate
+Implementation Notes
+This method activates an existing user who was suspended after entering incorrect credentials multiple times. The user who runs this web service must have Audit Users and Activate Users permissions in the Vault. To activate a user, the user must be associated with only one network area
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the user
+
+path	string
+post /api/Users/{userID}/disable
+Implementation Notes
+This method disables a specific User in the Vault.
+
+To run this web service, the user must have the AddUpdate users permissions in the Vault.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the user to disable.
+
+path	string
+post /api/Users/{userID}/enable
+Implementation Notes
+This method enables a specific User in the Vault.
+
+To run this web service, the user must have the AddUpdate users permissions in the Vault.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the user to enable.
+
+path	string
+post /api/Users/{userID}/ResetPassword
+Implementation Notes
+This method resets an existing Vault user's password.The user who runs this web service must have Audit Users and Reset Users’ Passwords permissions in the Vault. In addition, the user who runs this web service must be in the same Vault location as the user whose password is being reset or in a higher location.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the user.
+
+path	string
+resetUserPassword	
+(required)
+
+Parameter content type: 
+application/json
+The user’s new password.
+
+body	
+ModelExample Value
+{
+  "newPassword": "string"
+}
+delete /api/Users/{userID}/Secret/SSHKeys
+Implementation Notes
+This method deletes an authorized public SSH key for a specific user in the Vault, preventing them from authenticating to the Vault via PSM for SSH using a corresponding private SSH key. The user who runs this web service must have Reset User's Passwords permission in the Vault. In addition, the user who runs this web service must be in the same Vault location as the user whose public SSH keys are deleted or in a higher location.
+
+Response Class (Status 204)
+The user’s SSH key was deleted
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the user
+
+path	string
+sshKeyToDelete	
+(required)
+
+Parameter content type: 
+application/json
+The SSH key fingerprint that you want to delete
+
+body	
+ModelExample Value
+{
+  "keyFingerprint": "string",
+  "keyStoreTypeFilter": 0
+}
+get /api/Users/{userID}/Secret/SSHKeys
+Implementation Notes
+This method gets the ssh public keys stored in the vault for the user
+
+To run this web service, the user must have reset users password permissions.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "value": [
+    {
+      "publicKey": "string",
+      "fingerprint": "string",
+      "creationTime": 0,
+      "sshKeyStoreType": 0
+    }
+  ],
+  "count": 0,
+  "nextLink": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the user for which public ssh keys are returned.
+
+path	string
+keyStoreTypeFilter	
+The key type filter
+
+query	integer
+post /api/Users/{userID}/Secret/SSHKeys
+Implementation Notes
+This method adds an ssh public key to the vault for the user id
+
+To run this web service, the user must have the Audit users permissions in the Vault.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "publicKey": "string",
+  "fingerprint": "string",
+  "creationTime": 0,
+  "sshKeyStoreType": 0
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the user to add the ssh key to.
+
+path	string
+sshKeyToAdd	
+(required)
+
+Parameter content type: 
+application/json
+The ssh key to add to the user
+
+body	
+ModelExample Value
+{
+  "publicKey": "string"
+}
+delete /api/Users/{userID}/Secret/SSHKeys/Cache
+Implementation Notes
+This method deletes the cached ssh public key for the given user id from the vault
+
+To run this web service, the user must have the Audit users permissions in the Vault.
+
+Response Class (Status 204)
+The user cached SSH key was destroyed.
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the User for which the cached ssh key will be destroyed.
+
+path	string
+post /api/Users/{userID}/Secret/SSHKeys/Cache
+Implementation Notes
+This method generates a cached ssh public key a given user and stores it on the vault
+
+To run this web service, the user must have the Audit users permissions in the Vault.
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "value": [
+    {
+      "format": 0,
+      "privateKey": "string",
+      "keyAlg": 0
+    }
+  ],
+  "creationTime": 0,
+  "expirationTime": 0,
+  "publicKey": "string",
+  "count": 0,
+  "nextLink": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+userID	
+(required)
+The ID of the User for which the key will be generated
+
+path	string
+genModel	
+(required)
+
+Parameter content type: 
+application/json
+The information as to how to format and output the generated ssh key
+
+body	
+ModelExample Value
+{
+  "formats": [
+    0
+  ],
+  "keyPassword": "string"
+}
+delete /api/Users/Secret/SSHKeys/Cache
+Implementation Notes
+This method deletes your user’s cached public SSH key used to connect to targets via PSM for SSH. The user who runs this web service must be authenticated to the Vault.
+
+Response Class (Status 204)
+The current user cached SSH key was destroyed
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+post /api/Users/Secret/SSHKeys/Cache
+Implementation Notes
+This method generates a cached ssh public key for the logged user and stores it on the vault
+
+To run this web service, the user must only be authenticated to the vault
+
+Response Class (Status 200)
+OK
+
+ModelExample Value
+{
+  "value": [
+    {
+      "format": 0,
+      "privateKey": "string",
+      "keyAlg": 0
+    }
+  ],
+  "creationTime": 0,
+  "expirationTime": 0,
+  "publicKey": "string",
+  "count": 0,
+  "nextLink": "string"
+}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+genModel	
+(required)
+
+Parameter content type: 
+application/json
+The information as to how to format and output the generated ssh key
+
+body	
+ModelExample Value
+{
+  "formats": [
+    0
+  ],
+  "keyPassword": "string"
+}
+delete /api/Users/Secret/SSHKeys/ClearCache
+Implementation Notes
+This method deletes all the cached ssh public key for all the users with the given filters
+
+To run this web service, the user must have the Audit users permissions in the Vault.
+
+Response Class (Status 204)
+All users cached SSH keys were destroyed.
+
+ModelExample Value
+{}
+
+
+Response Content Type 
+application/json
+Parameters
+Parameter	Value	Description	Parameter Type	Data Type
+search	
+Searching according to REST standard. The search will be by username, first name and last name.
+
+query	string
+userType	
+The type of the user.
+
+query	string
+componentUser	
+If the user is a component, then the value is true. Otherwise, it is false.
+
+query	boolean
+[ base url: /PasswordVault , api version: v1 ]
