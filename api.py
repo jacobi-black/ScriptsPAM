@@ -3,202 +3,152 @@ import argparse
 import configparser
 import json
 import logging
+import os
 import sys
-from datetime import datetime, timedelta
 
 import requests
 import urllib3
 
-# --- Configuration du logging ---
-logger = logging.getLogger("cyberark_pam_dashboard")
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter(
-    "%(asctime)s %(levelname)-8s %(name)s:%(lineno)d | %(message)s"
+# ---------------------------------------
+#  CyberArk PAM Dashboard Data Exporter
+# ---------------------------------------
+# Ce script extrait des données brutes depuis l'API CyberArk PAM et
+# les enregistre dans des fichiers JSON distincts dans le dossier output/.
+
+# --- Configuration du Logger ---
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)-8s %(message)s"
 )
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+logger = logging.getLogger("cyberark_pam_exporter")
 
-# --- Fonctions utilitaires ---
-
-def load_config(config_file):
-    """
-    Charge la configuration depuis un fichier INI.
-    Format attendu :
-      [pam]
-      url = https://PVWA_SERVER/PasswordVault/API
-      user = admin
-      password = secret
-      verify_ssl = false      # Mettre false pour désactiver la vérif.
-      page_size = 500
-    """
+# --- Lecture de la configuration ---
+def load_config(path="config.ini"):
     cfg = configparser.ConfigParser()
-    cfg.read(config_file)
+    cfg.read(path)
     return {
-        "url": cfg.get("pam", "url"),
-        "user": cfg.get("pam", "user"),
-        "password": cfg.get("pam", "password"),
-        "verify_ssl": cfg.getboolean("pam", "verify_ssl", fallback=True),
-        "page_size": cfg.getint("pam", "page_size", fallback=1000)
+        'base_url':    cfg.get('CyberArk', 'url').rstrip('/'),
+        'username':    cfg.get('CyberArk', 'username'),
+        'password':    cfg.get('CyberArk', 'password'),
+        'verify_ssl':  cfg.getboolean('CyberArk', 'verify_ssl', fallback=True),
+        'page_size':   cfg.getint('CyberArk', 'page_size', fallback=1000),
     }
 
-def get_args():
-    parser = argparse.ArgumentParser(
-        description="Récupère les métriques CyberArk PAM pour dashboard"
-    )
-    parser.add_argument(
-        "-c", "--config", default="config.ini",
-        help="Fichier INI contenant [pam] url, user, password, verify_ssl, page_size"
-    )
-    parser.add_argument(
-        "--log-file", default=None,
-        help="Chemin d'un fichier pour enregistrer les logs"
-    )
-    parser.add_argument(
-        "--debug", action="store_true",
-        help="Active le mode DEBUG"
-    )
-    return parser.parse_args()
-
-def paginate(session, endpoint, params, key, page_size):
-    """
-    Parcourt un endpoint SCIM (startIndex/count) pour récupérer tous les items.
-    """
-    all_items = []
-    start = 1
-    while True:
-        p = params.copy()
-        p.update({"startIndex": start, "count": page_size})
-        resp = session.get(endpoint, params=p)
+# --- Authentification ---
+def authenticate(base_url, user, pwd, verify_ssl):
+    url = f"{base_url}/Auth/Cyberark/Logon/"
+    try:
+        resp = requests.post(url, json={'username': user, 'password': pwd}, verify=verify_ssl)
         resp.raise_for_status()
-        data = resp.json()
-        items = data.get(key, [])
-        all_items.extend(items)
-        logger.debug("Récupéré %d items depuis %s (startIndex=%d)", len(items), endpoint, start)
-        if len(items) < page_size:
-            break
-        start += page_size
-    return all_items
-
-# --- Endpoints CyberArk PAM ---
-
-def authenticate(cfg):
-    url = f"{cfg['url'].rstrip('/')}/Auth/Cyberark/Logon"
-    payload = {"username": cfg["user"], "password": cfg["password"]}
-    logger.info("Authentification auprès de %s", url)
-    resp = requests.post(url, json=payload, verify=cfg["verify_ssl"])
-    resp.raise_for_status()
+    except requests.RequestException as e:
+        logger.error("Échec de l'authentification : %s", e)
+        sys.exit(1)
     token = resp.text.strip('"')
-    logger.debug("Token (début): %s…", token[:8])
+    logger.info("Authentification réussie")
     return token
 
-def get_system_health(session, base_url):
-    summary_url = f"{base_url}/SystemHealth/Summary"
-    resp = session.get(summary_url)
-    resp.raise_for_status()
-    summary = resp.json()
-    details = {}
-    for comp in summary.get("components", []):
-        cname = comp["component"]
-        detail_url = f"{base_url}/SystemHealth/Details"
-        r = session.get(detail_url, params={"component": cname})
-        r.raise_for_status()
-        details[cname] = r.json()
-    return summary, details
+# --- Pagination générique ---
+def fetch_all(session, endpoint, params=None, list_key=None, page_size=1000):
+    results = []
+    offset = 0
+    params = params.copy() if params else {}
+    while True:
+        params.update({'offset': offset, 'limit': page_size})
+        resp = session.get(session.base_url + endpoint, params=params)
+        resp.raise_for_status()
+        data = resp.json()
+        # Détecter la liste cible
+        if list_key and list_key in data:
+            batch = data[list_key]
+        elif isinstance(data, dict) and 'value' in data:
+            batch = data['value']
+        else:
+            # si objet ou liste brute
+            batch = data if isinstance(data, list) else []
+        results.extend(batch)
+        logger.debug("Récupéré %d items pour %s (offset=%d)", len(batch), endpoint, offset)
+        if len(batch) < page_size:
+            break
+        offset += page_size
+    return results
 
-def get_users(session, base_url, page_size):
-    endpoint = f"{base_url}/Users"
-    # SCIM pagination via startIndex & count
-    return paginate(session, endpoint, {}, "users", page_size)
+# --- Sauvegarde JSON ---
+def save_json(data, filename):
+    os.makedirs('output', exist_ok=True)
+    path = os.path.join('output', filename)
+    try:
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        logger.info("Fichier écrit: %s", path)
+    except Exception as e:
+        logger.error("Erreur écriture %s: %s", path, e)
 
-def get_psm_sessions(session, base_url):
-    url = f"{base_url}/PSM/Session/GetLiveSessions"
-    resp = session.get(url)
-    resp.raise_for_status()
-    return resp.json().get("sessions", [])
-
-def get_activity_log(session, base_url, start, end):
-    url = f"{base_url}/Reports/ActivityLog"
-    params = {
-        "fromDate": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "toDate":   end.strftime("%Y-%m-%dT%H:%M:%SZ")
-    }
-    resp = session.get(url, params=params)
-    resp.raise_for_status()
-    return resp.json().get("records", [])
-
-def get_safes_accounts(session, base_url, page_size):
-    safes = paginate(session, f"{base_url}/Safes", {}, "safes", page_size)
-    result = {}
-    for s in safes:
-        name = s["safeName"]
-        accounts = paginate(
-            session,
-            f"{base_url}/Accounts",
-            {"safe": name},
-            "accounts",
-            page_size
-        )
-        result[name] = accounts
-    return result
-
-# --- Main ---
-
+# --- Main Execution ---
 def main():
-    args = get_args()
-    cfg = load_config(args.config)
+    parser = argparse.ArgumentParser(description="Export JSON des données CyberArk PAM")
+    parser.add_argument('-c', '--config', default='config.ini', help='Chemin vers config.ini')
+    parser.add_argument('--debug', action='store_true', help='Activer logs DEBUG')
+    args = parser.parse_args()
 
-    # Reconfigurer le logger si demandé
-    if args.log_file:
-        fh = logging.FileHandler(args.log_file)
-        fh.setFormatter(formatter)
-        fh.setLevel(logging.DEBUG if args.debug else logging.INFO)
-        logger.addHandler(fh)
     if args.debug:
         logger.setLevel(logging.DEBUG)
-        logging.getLogger("urllib3").setLevel(logging.DEBUG)
 
-    # Gérer SSL verification et warnings
-    if not cfg["verify_ssl"]:
+    cfg = load_config(args.config)
+    # Désactiver warnings SSL si demandé
+    if not cfg['verify_ssl']:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        logger.warning("Vérification SSL désactivée (verify_ssl=False)")
+        logger.warning("Vérification SSL désactivée")
 
-    try:
-        # Authentification
-        token = authenticate(cfg)
+    # Authentification
+    token = authenticate(cfg['base_url'], cfg['username'], cfg['password'], cfg['verify_ssl'])
 
-        # Créer une session partagée pour tous les appels
-        sess = requests.Session()
-        sess.verify = cfg["verify_ssl"]        # <-- propagate verify_ssl
-        sess.headers.update({"Authorization": token})
+    # Préparer session HTTP
+    session = requests.Session()
+    session.base_url = cfg['base_url']
+    session.verify   = cfg['verify_ssl']
+    session.headers.update({'Authorization': token, 'Content-Type': 'application/json'})
 
-        # Dates pour le rapport d'activité (30 derniers jours)
-        end = datetime.utcnow()
-        start = end - timedelta(days=30)
+    # 1. Utilisateurs
+    users = fetch_all(session, '/Users/', list_key='Users', page_size=cfg['page_size'])
+    save_json({'Users': users}, 'users.json')
 
-        # Collecte des métriques
-        health_summary, health_details = get_system_health(sess, cfg["url"])
-        users    = get_users(sess, cfg["url"], cfg["page_size"])
-        psm_sess = get_psm_sessions(sess, cfg["url"])
-        activity = get_activity_log(sess, cfg["url"], start, end)
-        safes    = get_safes_accounts(sess, cfg["url"], cfg["page_size"])
+    # 2. Sessions PSM/PSMP
+    sessions = fetch_all(session, '/LiveSessions', list_key='LiveSessions', page_size=cfg['page_size'])
+    save_json({'LiveSessions': sessions}, 'livesessions.json')
 
-        # Assemblage du payload
-        dashboard = {
-            "health_summary": health_summary,
-            "health_details": health_details,
-            "users":          {"count": len(users),     "data": users},
-            "psm_sessions":   {"count": len(psm_sess), "data": psm_sess},
-            "activity":       {"count": len(activity),  "data": activity},
-            "safes":          {"count": len(safes),     "data": safes}
-        }
+    # 3. Composants - résumé
+    summary = session.get(f"{cfg['base_url']}/ComponentsMonitoringSummary/").json()
+    save_json(summary, 'components_summary.json')
 
-        print(json.dumps(dashboard, indent=2, ensure_ascii=False))
+    # 4. Composants - détails par ID
+    components = summary.get('Components', [])
+    for comp in components:
+        cid = comp.get('ComponentID')
+        if cid:
+            detail = session.get(f"{cfg['base_url']}/ComponentsMonitoringDetails/{cid}/").json()
+            save_json(detail, f'component_{cid}.json')
 
-    except Exception as e:
-        logger.error("Échec lors de l'exécution : %s", e, exc_info=args.debug)
-        sys.exit(1)
+    # 5. Safes
+    safes = fetch_all(session, '/Safes/', list_key='value', page_size=cfg['page_size'])
+    save_json({'Safes': safes}, 'safes.json')
 
-if __name__ == "__main__":
+    # 6. Tous les comptes
+    accounts = fetch_all(session, '/Accounts', list_key='value', page_size=cfg['page_size'])
+    save_json({'Accounts': accounts}, 'accounts.json')
+
+    # 7. Comptes par Safe
+    for safe in safes:
+        name = safe.get('safeName')
+        if name:
+            accts = fetch_all(
+                session,
+                '/Accounts',
+                params={'filter': f"safeName eq {name}"},
+                list_key='value',
+                page_size=cfg['page_size']
+            )
+            filename = f"accounts_{name.replace(' ', '_')}.json"
+            save_json({'Accounts': accts}, filename)
+
+if __name__ == '__main__':
     main()
