@@ -12,8 +12,8 @@ import urllib3
 # ---------------------------------------
 #  CyberArk PAM Dashboard Data Exporter
 # ---------------------------------------
-# Ce script extrait des données brutes depuis l'API CyberArk PAM et
-# les enregistre dans des fichiers JSON distincts dans le dossier output/.
+# Extrait des données brutes depuis l'API CyberArk PAM
+# et enregistre chaque appel dans un fichier JSON distinct.
 
 # --- Configuration du Logger ---
 logging.basicConfig(
@@ -25,7 +25,6 @@ logger = logging.getLogger("cyberark_pam_exporter")
 # --- Lecture de la configuration ---
 def load_config(path="config.ini"):
     cfg = configparser.ConfigParser()
-    # Lire le fichier de config
     try:
         with open(path, 'r', encoding='utf-8') as f:
             cfg.read_file(f)
@@ -36,40 +35,37 @@ def load_config(path="config.ini"):
     if section not in cfg:
         logger.error("Section '%s' introuvable dans %s", section, path)
         sys.exit(1)
-    # Fonctions utilitaires pour parser valeurs avec commentaires inline
-    def parse_bool(option):
-        raw = cfg.get(section, option, fallback=None)
+    def get_raw(opt):
+        raw = cfg.get(section, opt, fallback=None)
         if raw is None:
-            logger.error("Option '%s' manquante dans la section %s", option, section)
+            logger.error("Option '%s' manquante dans la section %s", opt, section)
             sys.exit(1)
-        # retirer tout commentaire après ; ou #
-        val = raw.split(';', 1)[0].split('#', 1)[0].strip().lower()
-        return val in ('1', 'true', 'yes', 'on')
-    def parse_int(option, fallback):
-        raw = cfg.get(section, option, fallback=None)
-        if raw is None:
-            return fallback
-        val = raw.split(';', 1)[0].split('#', 1)[0].strip()
-        try:
-            return int(val)
-        except ValueError:
-            logger.error("La valeur de '%s' n'est pas un entier valide: %s", option, val)
-            sys.exit(1)
-    # Lecture des paramètres
-    base_url = cfg.get(section, 'url', fallback=None)
-    user     = cfg.get(section, 'username', fallback=None)
-    pwd      = cfg.get(section, 'password', fallback=None)
-    if not base_url or not user or not pwd:
-        logger.error("URL, username ou password manquant(s) dans la configuration")
+        return raw.split(';',1)[0].split('#',1)[0].strip()
+    base_url_raw = get_raw('url')
+    username    = get_raw('username')
+    password    = get_raw('password')
+    verify_raw  = get_raw('verify_ssl').lower()
+    page_raw    = get_raw('page_size')
+    # Parser du booléen verify_ssl
+    if verify_raw in ('true','1','yes','on'):
+        verify_ssl = True
+    elif verify_raw in ('false','0','no','off'):
+        verify_ssl = False
+    else:
+        logger.error("Valeur invalide pour verify_ssl: %s", verify_raw)
         sys.exit(1)
-    verify_ssl = parse_bool('verify_ssl')
-    page_size  = parse_int('page_size', 1000)
+    # Parser de l'entier page_size
+    try:
+        page_size = int(page_raw)
+    except ValueError:
+        logger.error("Valeur invalide pour page_size: %s", page_raw)
+        sys.exit(1)
     return {
-        'base_url':   base_url.rstrip('/'),
-        'username':   user,
-        'password':   pwd,
+        'base_url':   base_url_raw.rstrip('/'),
+        'username':   username,
+        'password':   password,
         'verify_ssl': verify_ssl,
-        'page_size':  page_size
+        'page_size':  page_size,
     }
 
 # --- Authentification ---
@@ -95,7 +91,7 @@ def fetch_all(session, endpoint, params=None, list_key=None, page_size=1000):
         resp = session.get(session.base_url + endpoint, params=params)
         resp.raise_for_status()
         data = resp.json()
-        # Identifier la liste cible
+        # Extraire la liste de résultats
         if list_key and isinstance(data, dict) and list_key in data:
             batch = data[list_key]
         elif isinstance(data, dict) and 'value' in data:
@@ -103,6 +99,7 @@ def fetch_all(session, endpoint, params=None, list_key=None, page_size=1000):
         elif isinstance(data, list):
             batch = data
         else:
+            # si réponse unique ou non paginée
             batch = []
         results.extend(batch)
         logger.debug("%d items récupérés pour %s (offset=%d)", len(batch), endpoint, offset)
@@ -128,15 +125,13 @@ def main():
     parser.add_argument('-c', '--config', default='config.ini', help='Chemin vers config.ini')
     parser.add_argument('--debug', action='store_true', help='Activer logs DEBUG')
     args = parser.parse_args()
-
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
     cfg = load_config(args.config)
-    # Désactiver warnings SSL si demandé
     if not cfg['verify_ssl']:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        logger.warning("Vérification SSL désactivée")
+        logger.warning("SSL verification désactivée")
 
     # Authentification
     token = authenticate(cfg['base_url'], cfg['username'], cfg['password'], cfg['verify_ssl'])
@@ -156,7 +151,9 @@ def main():
     save_json({'LiveSessions': live_sessions}, 'livesessions.json')
 
     # 3. Composants - résumé
-    summary = session.get(f"{cfg['base_url']}/ComponentsMonitoringSummary/").json()
+    summary_resp = session.get(f"{cfg['base_url']}/ComponentsMonitoringSummary/")
+    summary_resp.raise_for_status()
+    summary = summary_resp.json()
     save_json(summary, 'components_summary.json')
 
     # 4. Composants - détails par ID
@@ -164,7 +161,9 @@ def main():
     for comp in components:
         cid = comp.get('ComponentID')
         if cid:
-            detail = session.get(f"{cfg['base_url']}/ComponentsMonitoringDetails/{cid}/").json()
+            detail_resp = session.get(f"{cfg['base_url']}/ComponentsMonitoringDetails/{cid}/")
+            detail_resp.raise_for_status()
+            detail = detail_resp.json()
             save_json(detail, f'component_{cid}.json')
 
     # 5. Safes
@@ -177,9 +176,9 @@ def main():
 
     # 7. Comptes par Safe
     for safe in safes:
-        name = safe.get('safeName')
+        name = safe.get('safeName') or safe.get('SafeName')
         if name:
-            accounts_in_safe = fetch_all(
+            accts = fetch_all(
                 session,
                 '/Accounts',
                 params={'filter': f"safeName eq {name}"},
@@ -187,7 +186,7 @@ def main():
                 page_size=cfg['page_size']
             )
             filename = f"accounts_{name.replace(' ', '_')}.json"
-            save_json({'Accounts': accounts_in_safe}, filename)
+            save_json({'Accounts': accts}, filename)
 
 if __name__ == '__main__':
     main()
