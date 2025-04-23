@@ -7,6 +7,7 @@ import sys
 from datetime import datetime, timedelta
 
 import requests
+import urllib3
 
 # --- Configuration du logging ---
 logger = logging.getLogger("cyberark_pam_dashboard")
@@ -29,7 +30,7 @@ def load_config(config_file):
       url = https://PVWA_SERVER/PasswordVault/API
       user = admin
       password = secret
-      verify_ssl = true
+      verify_ssl = false      # Mettre false pour désactiver la vérif.
       page_size = 500
     """
     cfg = configparser.ConfigParser()
@@ -48,11 +49,11 @@ def get_args():
     )
     parser.add_argument(
         "-c", "--config", default="config.ini",
-        help="Fichier de config INI contenant [pam] url, user, password"
+        help="Fichier INI contenant [pam] url, user, password, verify_ssl, page_size"
     )
     parser.add_argument(
         "--log-file", default=None,
-        help="Fichier pour enregistrer les logs"
+        help="Chemin d'un fichier pour enregistrer les logs"
     )
     parser.add_argument(
         "--debug", action="store_true",
@@ -62,20 +63,19 @@ def get_args():
 
 def paginate(session, endpoint, params, key, page_size):
     """
-    Paginate over endpoints that support startIndex & count (SCIM style).
+    Parcourt un endpoint SCIM (startIndex/count) pour récupérer tous les items.
     """
     all_items = []
     start = 1
     while True:
         p = params.copy()
         p.update({"startIndex": start, "count": page_size})
-        r = session.get(endpoint, params=p)
-        r.raise_for_status()
-        data = r.json()
+        resp = session.get(endpoint, params=p)
+        resp.raise_for_status()
+        data = resp.json()
         items = data.get(key, [])
         all_items.extend(items)
-        logger.debug("Récup %d items depuis %s (start=%d)",
-                     len(items), endpoint, start)
+        logger.debug("Récupéré %d items depuis %s (startIndex=%d)", len(items), endpoint, start)
         if len(items) < page_size:
             break
         start += page_size
@@ -90,7 +90,7 @@ def authenticate(cfg):
     resp = requests.post(url, json=payload, verify=cfg["verify_ssl"])
     resp.raise_for_status()
     token = resp.text.strip('"')
-    logger.debug("Token reçu: %s…", token[:8])
+    logger.debug("Token (début): %s…", token[:8])
     return token
 
 def get_system_health(session, base_url):
@@ -101,14 +101,15 @@ def get_system_health(session, base_url):
     details = {}
     for comp in summary.get("components", []):
         cname = comp["component"]
-        d_url = f"{base_url}/SystemHealth/Details"
-        r = session.get(d_url, params={"component": cname})
+        detail_url = f"{base_url}/SystemHealth/Details"
+        r = session.get(detail_url, params={"component": cname})
         r.raise_for_status()
         details[cname] = r.json()
     return summary, details
 
 def get_users(session, base_url, page_size):
     endpoint = f"{base_url}/Users"
+    # SCIM pagination via startIndex & count
     return paginate(session, endpoint, {}, "users", page_size)
 
 def get_psm_sessions(session, base_url):
@@ -132,14 +133,14 @@ def get_safes_accounts(session, base_url, page_size):
     result = {}
     for s in safes:
         name = s["safeName"]
-        accts = paginate(
+        accounts = paginate(
             session,
             f"{base_url}/Accounts",
             {"safe": name},
             "accounts",
             page_size
         )
-        result[name] = accts
+        result[name] = accounts
     return result
 
 # --- Main ---
@@ -148,7 +149,7 @@ def main():
     args = get_args()
     cfg = load_config(args.config)
 
-    # Reconfiguration du logging si nécessaire
+    # Reconfigurer le logger si demandé
     if args.log_file:
         fh = logging.FileHandler(args.log_file)
         fh.setFormatter(formatter)
@@ -156,33 +157,45 @@ def main():
         logger.addHandler(fh)
     if args.debug:
         logger.setLevel(logging.DEBUG)
+        logging.getLogger("urllib3").setLevel(logging.DEBUG)
+
+    # Gérer SSL verification et warnings
+    if not cfg["verify_ssl"]:
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        logger.warning("Vérification SSL désactivée (verify_ssl=False)")
 
     try:
+        # Authentification
         token = authenticate(cfg)
+
+        # Créer une session partagée pour tous les appels
         sess = requests.Session()
+        sess.verify = cfg["verify_ssl"]        # <-- propagate verify_ssl
         sess.headers.update({"Authorization": token})
 
-        # Dates pour ActivityLog (30 derniers jours)
+        # Dates pour le rapport d'activité (30 derniers jours)
         end = datetime.utcnow()
         start = end - timedelta(days=30)
 
-        # Collecte optimisée
-        health_sum, health_det = get_system_health(sess, cfg["url"])
-        users        = get_users(sess, cfg["url"], cfg["page_size"])
-        psm_sess     = get_psm_sessions(sess, cfg["url"])
-        activity     = get_activity_log(sess, cfg["url"], start, end)
-        safes_accts  = get_safes_accounts(sess, cfg["url"], cfg["page_size"])
+        # Collecte des métriques
+        health_summary, health_details = get_system_health(sess, cfg["url"])
+        users    = get_users(sess, cfg["url"], cfg["page_size"])
+        psm_sess = get_psm_sessions(sess, cfg["url"])
+        activity = get_activity_log(sess, cfg["url"], start, end)
+        safes    = get_safes_accounts(sess, cfg["url"], cfg["page_size"])
 
+        # Assemblage du payload
         dashboard = {
-            "health_summary": health_sum,
-            "health_details": health_det,
-            "users":          {"count": len(users),      "data": users},
-            "psm_sessions":   {"count": len(psm_sess),  "data": psm_sess},
-            "activity":       {"count": len(activity),   "data": activity},
-            "safes":          {"count": len(safes_accts),"data": safes_accts}
+            "health_summary": health_summary,
+            "health_details": health_details,
+            "users":          {"count": len(users),     "data": users},
+            "psm_sessions":   {"count": len(psm_sess), "data": psm_sess},
+            "activity":       {"count": len(activity),  "data": activity},
+            "safes":          {"count": len(safes),     "data": safes}
         }
 
         print(json.dumps(dashboard, indent=2, ensure_ascii=False))
+
     except Exception as e:
         logger.error("Échec lors de l'exécution : %s", e, exc_info=args.debug)
         sys.exit(1)
