@@ -25,13 +25,51 @@ logger = logging.getLogger("cyberark_pam_exporter")
 # --- Lecture de la configuration ---
 def load_config(path="config.ini"):
     cfg = configparser.ConfigParser()
-    cfg.read(path)
+    # Lire le fichier de config
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            cfg.read_file(f)
+    except Exception as e:
+        logger.error("Impossible de lire le fichier de configuration %s: %s", path, e)
+        sys.exit(1)
+    section = 'CyberArk'
+    if section not in cfg:
+        logger.error("Section '%s' introuvable dans %s", section, path)
+        sys.exit(1)
+    # Fonctions utilitaires pour parser valeurs avec commentaires inline
+    def parse_bool(option):
+        raw = cfg.get(section, option, fallback=None)
+        if raw is None:
+            logger.error("Option '%s' manquante dans la section %s", option, section)
+            sys.exit(1)
+        # retirer tout commentaire après ; ou #
+        val = raw.split(';', 1)[0].split('#', 1)[0].strip().lower()
+        return val in ('1', 'true', 'yes', 'on')
+    def parse_int(option, fallback):
+        raw = cfg.get(section, option, fallback=None)
+        if raw is None:
+            return fallback
+        val = raw.split(';', 1)[0].split('#', 1)[0].strip()
+        try:
+            return int(val)
+        except ValueError:
+            logger.error("La valeur de '%s' n'est pas un entier valide: %s", option, val)
+            sys.exit(1)
+    # Lecture des paramètres
+    base_url = cfg.get(section, 'url', fallback=None)
+    user     = cfg.get(section, 'username', fallback=None)
+    pwd      = cfg.get(section, 'password', fallback=None)
+    if not base_url or not user or not pwd:
+        logger.error("URL, username ou password manquant(s) dans la configuration")
+        sys.exit(1)
+    verify_ssl = parse_bool('verify_ssl')
+    page_size  = parse_int('page_size', 1000)
     return {
-        'base_url':    cfg.get('CyberArk', 'url').rstrip('/'),
-        'username':    cfg.get('CyberArk', 'username'),
-        'password':    cfg.get('CyberArk', 'password'),
-        'verify_ssl':  cfg.getboolean('CyberArk', 'verify_ssl', fallback=True),
-        'page_size':   cfg.getint('CyberArk', 'page_size', fallback=1000),
+        'base_url':   base_url.rstrip('/'),
+        'username':   user,
+        'password':   pwd,
+        'verify_ssl': verify_ssl,
+        'page_size':  page_size
     }
 
 # --- Authentification ---
@@ -57,16 +95,17 @@ def fetch_all(session, endpoint, params=None, list_key=None, page_size=1000):
         resp = session.get(session.base_url + endpoint, params=params)
         resp.raise_for_status()
         data = resp.json()
-        # Détecter la liste cible
-        if list_key and list_key in data:
+        # Identifier la liste cible
+        if list_key and isinstance(data, dict) and list_key in data:
             batch = data[list_key]
         elif isinstance(data, dict) and 'value' in data:
             batch = data['value']
+        elif isinstance(data, list):
+            batch = data
         else:
-            # si objet ou liste brute
-            batch = data if isinstance(data, list) else []
+            batch = []
         results.extend(batch)
-        logger.debug("Récupéré %d items pour %s (offset=%d)", len(batch), endpoint, offset)
+        logger.debug("%d items récupérés pour %s (offset=%d)", len(batch), endpoint, offset)
         if len(batch) < page_size:
             break
         offset += page_size
@@ -79,9 +118,9 @@ def save_json(data, filename):
     try:
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-        logger.info("Fichier écrit: %s", path)
+        logger.info("Fichier écrit : %s", path)
     except Exception as e:
-        logger.error("Erreur écriture %s: %s", path, e)
+        logger.error("Erreur écriture %s : %s", path, e)
 
 # --- Main Execution ---
 def main():
@@ -113,8 +152,8 @@ def main():
     save_json({'Users': users}, 'users.json')
 
     # 2. Sessions PSM/PSMP
-    sessions = fetch_all(session, '/LiveSessions', list_key='LiveSessions', page_size=cfg['page_size'])
-    save_json({'LiveSessions': sessions}, 'livesessions.json')
+    live_sessions = fetch_all(session, '/LiveSessions', list_key='LiveSessions', page_size=cfg['page_size'])
+    save_json({'LiveSessions': live_sessions}, 'livesessions.json')
 
     # 3. Composants - résumé
     summary = session.get(f"{cfg['base_url']}/ComponentsMonitoringSummary/").json()
@@ -140,7 +179,7 @@ def main():
     for safe in safes:
         name = safe.get('safeName')
         if name:
-            accts = fetch_all(
+            accounts_in_safe = fetch_all(
                 session,
                 '/Accounts',
                 params={'filter': f"safeName eq {name}"},
@@ -148,7 +187,7 @@ def main():
                 page_size=cfg['page_size']
             )
             filename = f"accounts_{name.replace(' ', '_')}.json"
-            save_json({'Accounts': accts}, filename)
+            save_json({'Accounts': accounts_in_safe}, filename)
 
 if __name__ == '__main__':
     main()
